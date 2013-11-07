@@ -1,7 +1,10 @@
 #ifndef MARCHINGCUBES_H
 #define MARCHINGCUBES_H
 
+#include <pcl/gpu/containers/initialization.h>
+#include <pcl/pcl_macros.h>
 #include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
 #include "internal.h"
 #include "TsdfVolume.h"
 

@@ -2,16 +2,18 @@
 #define IMAGE_H
 
 #include <iostream>
+#include <pcl/gpu/containers/initialization.h>
 #include <pcl/pcl_macros.h>
-#include <pcl/gpu/containers/device_array.hpp>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
+#include <pcl/gpu/containers/device_array.h>
 #include <Eigen/Core>
 #include <vector>
-#include "pcl/gpu/containers/kernel_containers.hpp"
+#include <pcl/gpu/containers/kernel_containers.h>
 #include "internal.h"
 #include "MyPointCloud.h"
-#include "openni_capture.h"
+//#include "../pcl-trunk/gpu/kinfu/tools/openni_capture.h"
+#include "../tools/openni_capture.h"
 
 using namespace std;
 using namespace pcl;

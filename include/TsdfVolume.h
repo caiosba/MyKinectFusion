@@ -7,9 +7,16 @@
 #include <Eigen/Geometry>
 #include <Eigen/LU>
 #include <vector>
-#include <pcl/gpu/containers/device_array.hpp>
+#include <pcl/pcl_macros.h>
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+#include <pcl/gpu/containers/device_array.h>
+#include "../tools/openni_capture.h"
+//#include "../pcl-trunk/gpu/kinfu/tools/openni_capture.h"
+#include <pcl/gpu/kinfu/kinfu.h>
+#include <pcl/gpu/containers/kernel_containers.h>
 #include "internal.h"
-#include "openni_capture.h"
+#include <pcl/gpu/containers/initialization.h>
 #include "MyPointCloud.h"
 
 using namespace Eigen;
@@ -31,8 +38,9 @@ public:
 	//10 * 1000 * 1000
 	enum { DEFAULT_CLOUD_BUFFER_SIZE = 10 * 1000 * 1000 };
 
-	Eigen::Vector3f getVolumeSize() { return volumeSize_; }
+	Eigen::Vector3f& getVolumeSize() { return volumeSize_; }
 	void getHostErrorInRGB(KinfuTracker::View &errorInRGB);
+	void getHostErrorInRGB();
 	DeviceArray2D<int> getVolume() { return volume_; }
 
 	void setTSDFVisualization(bool hasTSDFVisualization) { hasTSDFVisualization_ = hasTSDFVisualization; }

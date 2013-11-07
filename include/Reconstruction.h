@@ -5,7 +5,8 @@
 #define NOMINMAX
 #define USE_HEAD_POSE_ESTIMATION 1
 
-#include "openni_capture.h"
+//#include "../pcl-trunk/gpu/kinfu/tools/openni_capture.h"
+#include "../tools/openni_capture.h"
 #include "Image.h"
 #include "MyPointCloud.h"
 #include "TsdfVolume.h"
@@ -16,7 +17,7 @@
 
 #include <iostream>
 //#include "pcl/gpu/kinfu/kinfu.h"
-#include "pcl/gpu/containers/initialization.hpp"
+#include <pcl/gpu/containers/initialization.h>
 
 #include <pcl/common/time.h>
 #include <pcl/point_cloud.h>

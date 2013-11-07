@@ -1,7 +1,7 @@
 #ifndef VOLUMETRICDATA_H
 #define VOLUMETRICDATA_H
 
-#include <opencv2\opencv.hpp>
+#include <opencv2/opencv.hpp>
 
 class VolumetricData
 {

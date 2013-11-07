@@ -7,8 +7,13 @@
 #include <Eigen/Geometry>
 #include <Eigen/LU>
 #include <vector>
-#include <pcl/gpu/containers/device_array.hpp>
-#include "openni_capture.h"
+#include <pcl/gpu/containers/initialization.h>
+#include <pcl/pcl_macros.h>
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+#include <pcl/gpu/containers/device_array.h>
+//#include "../pcl-trunk/gpu/kinfu/tools/openni_capture.h"
+#include "../tools/openni_capture.h"
 #include "internal.h"
 #include "MyPointCloud.h"
 

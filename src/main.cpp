@@ -5,7 +5,7 @@
 #include <pcl/console/parse.h>
 #include <GL/glew.h>
 #include <GL/glut.h>
-#include "pcl/gpu/containers/initialization.hpp"
+#include <pcl/gpu/containers/initialization.h>
 #include "Reconstruction.h"
 #include "VolumetricData.h"
 #include "Viewers/MyGLImageViewer.h"

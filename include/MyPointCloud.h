@@ -7,9 +7,11 @@
 #include <Eigen/Geometry>
 #include <Eigen/LU>
 #include <vector>
-#include "pcl/gpu/containers/kernel_containers.hpp"
+#include <pcl/gpu/containers/device_array.h>
+#include <pcl/gpu/containers/kernel_containers.h>
 #include "internal.h"
-#include "openni_capture.h"
+//#include "../pcl-trunk/gpu/kinfu/tools/openni_capture.h"
+#include "../tools/openni_capture.h"
 
 #define LEVELS 3
 
