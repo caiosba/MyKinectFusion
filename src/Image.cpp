@@ -1,5 +1,7 @@
 #include "Image.h"
 
+using namespace pcl;
+
 template<class D, class Matx> D&
 device_cast (Matx& matx)
 {

@@ -14,6 +14,7 @@
 #include "MyPointCloud.h"
 //#include "../pcl-trunk/gpu/kinfu/tools/openni_capture.h"
 #include "../tools/openni_capture.h"
+#include <pcl/io/pcd_io.h>
 
 using namespace std;
 using namespace pcl;
