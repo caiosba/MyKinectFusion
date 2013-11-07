@@ -1,9 +1,9 @@
 #ifndef COLORED_RECONSTRUCTION_MEDIATOR_H
 #define COLORED_RECONSTRUCTION_MEDIATOR_H
 
+#include "Reconstruction.h"
 #include "ColorVolume.h"
 #include "TsdfVolume.h"
-#include "Reconstruction.h"
 #include <pcl/io/pcd_io.h>
 
 class ColoredReconstructionMediator

@@ -1,3 +1,4 @@
+#include "Reconstruction.h"
 #include "Mediators/ColoredReconstructionMediator.h"
 
 ColoredReconstructionMediator::ColoredReconstructionMediator(Eigen::Vector3f& volumeSize) {

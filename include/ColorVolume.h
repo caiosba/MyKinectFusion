@@ -26,7 +26,7 @@ public:
 	ColorVolume(Eigen::Vector3f& tsdfSize, int maxWeight = 2);
 	DeviceArray2D<int>& getColorVolume() { return colorVolume; }
 	void updateColorVolume(device::Intr &intr, float trancDist, std::vector<Matrix3frm> &rmats_, std::vector<Eigen::Vector3f> &tvecs_, 
-		std::vector<device::MapArr> &vmapsGPrev, KinfuTracker::View &rgbDevice);
+		std::vector<device::MapArr> &vmapsGPrev, KinfuTracker::View rgbDevice);
 	void fetchColors(const DeviceArray<PointXYZ>& cloud, DeviceArray<RGB>& colors);
 	void reset();
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW

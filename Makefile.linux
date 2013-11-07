@@ -17,18 +17,24 @@ INCFLAGS = -I/usr/include/pcl-1.6/ -I/usr/include/eigen3 -I/usr/include/eigen3/E
 NVCCFLAGS = -arch=sm_11
 
 #LDFLAGS = -lpcl_search_release -lpcl_features_release -lpcl_kdtree_release -lopencv_core231 -lopencv_highgui231 -lopencv_imgproc231 -lopencv_objdetect231 -lpcl_common_release -lpcl_io_release -lpcl_io_ply_release -lvtkexpat -lvtkDICOMParser -lopenNI64 -lvtkjpeg -lvtkjpeg-gd -lvtktiff -lvtktiff-gd -lopengl32 -lvtkCharts -lvtkCharts-gd -lvtkalglib -lvtkalglib-gd -lvtkpng -lvtkpng-gd -lvtklibxml2 -lvtklibxml2-gd -lvtkIO -lvtkIO-gd -lvtkInfovis -lvtkInfovis-gd -lvtkzlib -lvtkzlib-gd -lvtkVolumeRendering -lvtkVolumeRendering-gd -lvtksys -lvtksys-gd -lvtkRendering -lvtkRendering-gd -lvtkGraphics -lvtkGraphics-gd -lvtkCommon -lvtkCommon-gd -lvtkFiltering -lvtkFiltering-gd -lcuda -lcudart -lboost_date_time-vc100-mt-1_47 -lboost_date_time-vc100-mt-gd-1_47 -lpcl_visualization_release -lpcl_gpu_containers -lGL -lGLU -lglut
-LDFLAGS = -lGL -lGLU -lglut -lcuda -lcufft -lcv -lhighgui -lcvaux -lopencv_imgproc -lpcl_search -lpcl_features -lpcl_kdtree -lpcl_common -lpcl_io -lpcl_io_ply -lpcl_visualization
+LDFLAGS = -lGL -lGLU -lglut -lcuda -lcufft -lcv -lhighgui -lcvaux -lopencv_imgproc -lpcl_search -lpcl_features -lpcl_kdtree -lpcl_common -lpcl_io -lpcl_io_ply -lpcl_visualization -lGLEW
 
-OBJFILES = obj/device_memory.o obj/error.o obj/initialization.o obj/main.o obj/ColorVolume.o obj/FaceDetection.o obj/Image.o obj/MarchingCubes.o obj/Mesh.o obj/MyCVPointCloud.o obj/MyPointCloud.o obj/Reconstruction.o obj/TsdfVolume.o obj/HeadPoseEstimator/CRTree.o obj/HeadPoseEstimator/CRForestEstimator.o obj/HeadPoseEstimator/HeadPoseEstimator.o obj/cuda/colors.o obj/cuda/estimate_combined.o obj/cuda/extract.o obj/cuda/image_generator.o obj/cuda/maps.o obj/cuda/marching_cubes.o obj/cuda/normals_eigen.o obj/cuda/ray_caster.o obj/cuda/tsdf_volume.o
+OBJFILES = obj/device_memory.o obj/error.o obj/initialization.o obj/main.o obj/ColorVolume.o obj/FaceDetection.o obj/Image.o obj/MarchingCubes.o obj/Mesh.o obj/MyCVPointCloud.o obj/MyPointCloud.o obj/Reconstruction.o obj/TsdfVolume.o obj/HeadPoseEstimator/CRTree.o obj/HeadPoseEstimator/CRForestEstimator.o obj/HeadPoseEstimator/HeadPoseEstimator.o obj/cuda/colors.o obj/cuda/estimate_combined.o obj/cuda/extract.o obj/cuda/image_generator.o obj/cuda/maps.o obj/cuda/marching_cubes.o obj/cuda/normals_eigen.o obj/cuda/ray_caster.o obj/cuda/tsdf_volume.o obj/Viewers/MyGLImageViewer.o obj/Viewers/MyGLCloudViewer.o obj/Mediators/ColoredReconstructionMediator.o obj/Mediators/HeadPoseEstimationMediator.o obj/Mediators/MeshGenerationMediator.o obj/VolumetricData.o obj/Viewers/shader.o obj/Viewers/glm.o
 
 EXECFILES	= KinectFusion
 
 # ***********************************************************************************
 all:	$(EXECFILES)
 
-KinectFusion:	KinectFusion
+KinectFusion:	$(OBJFILES) obj/Kinect.o
 	@echo "Linking ...."
-	$(CXX) $(CFLAGS) $(CPPFLAGS) $(INCFLAGS) $(LIBPATH) $(OBJFILES) $(LDFLAGS) -o KinectFusion
+	$(CXX)  $(CFLAG) $(CPPFLAGS) $(INCFLAGS) $(LIBPATH) $(OBJFILES) obj/Kinect.o $(LDFLAGS) -o KinectFusion
+
+obj/Kinect.o: src/Kinect.cpp
+	$(CXX) $(CFLAGS) -o obj/Kinect.o -c src/Kinect.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
+
+obj/VolumetricData.o: src/VolumetricData.cpp
+	$(CXX) $(CFLAGS) -o obj/VolumetricData.o -c src/VolumetricData.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
 
 obj/device_memory.o:	tools/device_memory.cpp
 	$(CXX) $(CFLAGS) -o obj/device_memory.o -c tools/device_memory.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
@@ -72,17 +78,32 @@ obj/Reconstruction.o:	src/Reconstruction.cpp
 obj/TsdfVolume.o:	src/TsdfVolume.cpp
 	$(CXX) $(CFLAGS) -o obj/TsdfVolume.o -c src/TsdfVolume.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
 
-#obj/Viewers/My2DImageViewer.o:	src/Viewers/My2DImageViewer.cpp
-#	$(CXX) $(CFLAGS) -o obj/Viewers/My2DImageViewer.o -c src/Viewers/My2DImageViewer.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
+obj/Viewers/MyGLImageViewer.o:	src/Viewers/MyGLImageViewer.cpp
+	$(CXX) $(CFLAGS) -o obj/Viewers/MyGLImageViewer.o -c src/Viewers/MyGLImageViewer.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
 
 #obj/Viewers/My3DImageViewer.o:	src/Viewers/My3DImageViewer.cpp
 #	$(CXX) $(CFLAGS) -o obj/Viewers/My3DImageViewer.o -c src/Viewers/My3DImageViewer.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
 
-#obj/Viewers/MyCloudViewer.o:	src/Viewers/MyCloudViewer.cpp
-#	$(CXX) $(CFLAGS) -o obj/Viewers/MyCloudViewer.o -c src/Viewers/MyCloudViewer.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
+obj/Viewers/MyGLCloudViewer.o:	src/Viewers/MyGLCloudViewer.cpp
+	$(CXX) $(CFLAGS) -o obj/Viewers/MyGLCloudViewer.o -c src/Viewers/MyGLCloudViewer.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
+
+obj/Viewers/shader.o:	src/Viewers/shader.cpp
+	$(CXX) $(CFLAGS) -o obj/Viewers/shader.o -c src/Viewers/shader.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
+
+obj/Viewers/glm.o:	src/Viewers/glm.cpp
+	$(CXX) $(CFLAGS) -o obj/Viewers/glm.o -c src/Viewers/glm.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
 
 obj/HeadPoseEstimator/CRTree.o:	src/HeadPoseEstimator/CRTree.cpp
 	$(CXX) $(CFLAGS) -o obj/HeadPoseEstimator/CRTree.o -c src/HeadPoseEstimator/CRTree.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
+
+obj/Mediators/ColoredReconstructionMediator.o: src/Mediators/ColoredReconstructionMediator.cpp
+	$(CXX) $(CFLAGS) -o obj/Mediators/ColoredReconstructionMediator.o -c src/Mediators/ColoredReconstructionMediator.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
+
+obj/Mediators/HeadPoseEstimationMediator.o: src/Mediators/HeadPoseEstimationMediator.cpp
+	$(CXX) $(CFLAGS) -o obj/Mediators/HeadPoseEstimationMediator.o -c src/Mediators/HeadPoseEstimationMediator.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
+
+obj/Mediators/MeshGenerationMediator.o: src/Mediators/MeshGenerationMediator.cpp
+	$(CXX) $(CFLAGS) -o obj/Mediators/MeshGenerationMediator.o -c src/Mediators/MeshGenerationMediator.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
 
 obj/HeadPoseEstimator/CRForestEstimator.o:	src/HeadPoseEstimator/CRForestEstimator.cpp
 	$(CXX) $(CFLAGS) -o obj/HeadPoseEstimator/CRForestEstimator.o -c src/HeadPoseEstimator/CRForestEstimator.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
@@ -134,4 +155,4 @@ obj/cuda/tsdf_volume.o:	src/cuda/tsdf_volume.cu
 
 clean:	
 	@echo "Clearing ..."
-	rm -f *.o core *~ $(EXECFILES)
+	rm -fr obj/* core *~ $(EXECFILES) && mkdir obj/cuda obj/HeadPoseEstimator obj/Viewers obj/Mediators

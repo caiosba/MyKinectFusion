@@ -21,7 +21,7 @@ ColorVolume::ColorVolume(Eigen::Vector3f& tsdfSize, int maxWeight) {
 }
 
 void ColorVolume::updateColorVolume(device::Intr &intr, float trancDist, std::vector<Matrix3frm> &rmats_, std::vector<Eigen::Vector3f> &tvecs_, 
-	std::vector<device::MapArr> &vmapsGPrev, KinfuTracker::View &rgbDevice) {
+	std::vector<device::MapArr> &vmapsGPrev, KinfuTracker::View rgbDevice) {
 
 	float3 device_volume_size = device_cast<float3>(volumeSize);
 

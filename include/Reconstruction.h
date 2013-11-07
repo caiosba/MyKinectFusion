@@ -128,9 +128,9 @@ private:
 	std::vector<KinfuTracker::RGB> view_host_;
 	
 	DeviceArray2D<pcl::PointXYZ> cloudDevice_;
-	std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ>> cloudHost_;
+	std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> > cloudHost_;
 	DeviceArray2D<pcl::PointXYZ> normalsDevice_;
-	std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ>> normalsHost_;
+	std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> > normalsHost_;
 	
 	device::DepthMap depthDevice;
 	KinfuTracker::View rgbDevice;
