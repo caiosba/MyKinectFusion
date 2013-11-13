@@ -1,3 +1,5 @@
+# This is the Makefile tested on Debian Squeeze
+
 .SUFFIXES: .cpp .cxx .h .cu .hpp
 
 # compiler names:
