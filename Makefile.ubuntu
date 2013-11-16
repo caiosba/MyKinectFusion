@@ -12,7 +12,7 @@ CFLAGS		= -g -fpermissive -Wno-deprecated -w
 
 # libraries to link with:
 
-LIBPATH = -L/usr/include/pcl-1.6/ -L/usr/include/pcl-1.7/ -L/usr/include/eigen3 -L/usr/include/eigen3/Eigen -L/usr/include -L/usr/lib/nvidia-331 -L/usr/local/include
+LIBPATH = -L/usr/include/pcl-1.6/ -L/usr/include/pcl-1.7/ -L/usr/include/eigen3 -L/usr/include/eigen3/Eigen -L/usr/include -L/usr/lib/nvidia-304 -L/usr/local/include
 
 INCFLAGS = -I/usr/include/pcl-1.6/ -I/usr/include/pcl-1.7 -I/usr/include/eigen3 -I/usr/include/eigen3/Eigen -Iinclude -I. -I/usr/include/vtk-5.4 -I/usr/include/vtk-5.8 -I/usr/include/openni -I/usr/include/pcl-1.6/pcl/io -I/usr/include/pcl-1.7/pcl/io -Iinclude/HeadPoseEstimator -I/usr/local/include/opencv
 
@@ -30,7 +30,7 @@ all:	$(EXECFILES)
 
 KinectFusion:	$(OBJFILES) obj/Kinect.o
 	@echo "Linking ...."
-	$(CXX)  $(CFLAG) $(CPPFLAGS) $(INCFLAGS) $(LIBPATH) $(OBJFILES) obj/Kinect.o $(LDFLAGS) -o KinectFusion
+	$(CXX)  $(CFLAG) $(CPPFLAGS) $(INCFLAGS) $(LIBPATH) $(OBJFILES) obj/Kinect.o $(LDFLAGS) -o KinectFusion -Wl,-rpath=/usr/lib/nvidia-304
 
 obj/Kinect.o: src/Kinect.cpp
 	$(CXX) $(CFLAGS) -o obj/Kinect.o -c src/Kinect.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
