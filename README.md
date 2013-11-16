@@ -6,5 +6,7 @@ Installation on Debian Squeeze: Install all required libraries and run "make". T
 Installation on Ubuntu 12.04: Run the install.ubuntu.sh script, then execute "KinectFusion". If you have some trouble on
 running "make", try removing /usr/include/pcl/gpu, running make, putting the "gpu" directory back and running "make" again.
 
+You may also need to set the path to libcuda.so, which can change from system to system depending on the driver version.
+
 References:
 https://github.com/MarcioCerqueira/MyKinectFusion

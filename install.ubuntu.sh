@@ -7,7 +7,7 @@ add-apt-repository ppa:v-launchpad-jochen-sprickerhof-de/pcl
 apt-get update
 
 # Some utilities that your computer must have
-apt-get install git-core unzip cmake-curses-gui g++ libcudart4 nvidia-cuda-dev nvidia-cuda-doc nvidia-cuda-gdb nvidia-cuda-toolkit python-pycuda python-pycuda-doc python-pycuda-headers libpcl-all libglew1.6-dev libglew1.6 freeglut3-dev freeglut3 libopencv-core-dev libopencv-core2.3 libopencv-contrib2.3 libopencv-contrib-dev libopencv-dev libopencv-flann2.3 libopencv-flann-dev libopencv-highgui-dev libopencv-highgui2.3 libopencv-imgproc2.3 libopencv-imgproc-dev
+apt-get install git-core unzip cmake-curses-gui g++ libcudart4 nvidia-cuda-dev nvidia-cuda-doc nvidia-cuda-gdb nvidia-cuda-toolkit python-pycuda python-pycuda-doc python-pycuda-headers libpcl-all libglew1.6-dev libglew1.6 freeglut3-dev freeglut3 libopencv-core-dev libopencv-core2.3 libopencv-contrib2.3 libopencv-contrib-dev libopencv-dev libopencv-flann2.3 libopencv-flann-dev libopencv-highgui-dev libopencv-highgui2.3 libopencv-imgproc2.3 libopencv-imgproc-dev cmake-curses-gui libhighgui-dev libcv-dev
 
 # Use custom opencv2 version (Debian Squeeze version, works on Ubuntu 12.04)
 rm -rf /usr/local/include/opencv2
@@ -28,8 +28,18 @@ cd include/pcl/gpu/containers
 cp impl/* .
 cd ../..
 cp -r gpu/ /usr/include/pcl-1.7/pcl/
-cd cd ../../../../../
+cd ../../../../../
 rm -rf master.zip pcl-master
+
+# Create build directories
+mkdir -p obj/cuda obj/HeadPoseEstimator obj/Mediators obj/Viewers
 
 # Compile the code
 make
+mv /usr/include/pcl-1.7/pcl/gpu/ /tmp
+make
+mv /tmp/gpu /usr/include/pcl-1.7/pcl/
+make
+
+# Run
+./KinectFusion
