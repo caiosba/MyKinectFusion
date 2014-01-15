@@ -1,2 +1,8 @@
 obj/*
 KinectFusion
+*.pcd
+*.ply
+*.patch
+*.swp
+*.swo
+*~

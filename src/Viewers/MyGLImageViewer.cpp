@@ -174,7 +174,7 @@ void MyGLImageViewer::drawRGBTexture(GLuint *texVBO, int index, int windowWidth,
 	//if(index == 2)
 	//	glUseProgram(shaderProg);
 	
-	gluOrtho2D( 0, windowWidth/2, windowHeight/2, 0 ); 
+	gluOrtho2D( 0, windowWidth, windowHeight, 0 ); 
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 
@@ -188,11 +188,11 @@ void MyGLImageViewer::drawRGBTexture(GLuint *texVBO, int index, int windowWidth,
 		glTexCoord2f(0.0f, 0.0f); 
 		glVertex2f(0.0f, 0.0f);
 		glTexCoord2f(1.0f, 0.0f); 
-		glVertex2f(windowWidth/2, 0.0f);
+		glVertex2f(windowWidth, 0.0f);
 		glTexCoord2f(1.0f, 1.0f); 
-		glVertex2f(windowWidth/2, windowHeight/2);
+		glVertex2f(windowWidth, windowHeight);
 		glTexCoord2f(0.0f, 1.0f); 
-		glVertex2f(0.0f, windowHeight/2);
+		glVertex2f(0.0f, windowHeight);
 	glEnd();
 
 	glDisable(GL_TEXTURE_2D);

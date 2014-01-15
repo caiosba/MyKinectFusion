@@ -45,6 +45,7 @@ public:
 
 	void setTSDFVisualization(bool hasTSDFVisualization) { hasTSDFVisualization_ = hasTSDFVisualization; }
 	void reset() {  device::initVolume<volume_elem_type> (volume_); }
+        void transformCamera(std::vector<Matrix3frm>& Rcam, std::vector<Vector3f>& tcam, int globalTime);
 	
 private:
 	Eigen::Vector3f volumeSize_;

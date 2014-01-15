@@ -1,4 +1,7 @@
 #include "TsdfVolume.h"
+#include <math.h>
+#define PI 3.14159265
+
 
 template<class D, class Matx> D&
 device_cast (Matx& matx) {
@@ -31,29 +34,42 @@ void TsdfVolume::integrateVolume(std::vector<Matrix3frm>& rmats, std::vector<Vec
 
 }
 
+void TsdfVolume::transformCamera(std::vector<Matrix3frm>& Rcam, std::vector<Vector3f>& tcam, int globalTime) {
+   Matrix3frm rmatz;
+   int angle = 30;
+   rmatz << cos(angle*PI/180), -sin(angle*PI/180), 0,
+            sin(angle*PI/180), cos(angle*PI/180), 0,
+            0, 0, 1;
+   Vector3f tvecz;
+   Rcam[globalTime] = Rcam[globalTime] * rmatz;
+}
+
 void TsdfVolume::raycast(std::vector<Matrix3frm>& rmats, std::vector<Vector3f>& tvecs, device::Intr& intrinsics, float trancDist, MyPointCloud *globalPreviousPointCloud,
 		int globalTime) {
 
 	if(hasTSDFVisualization_)
 		error_.create(480, 640);
 
+// rmats = Matrizes de rotação
+// tvecs = Vetores de translação
+
 	Matrix3frm Rcurr = rmats[globalTime]; //  [Ri|ti] - pos of camera, i.e.
+	Matrix3frm Rcurr_original = rmats[globalTime]; //  [Ri|ti] - pos of camera, i.e.
     Vector3f tcurr = tvecs[globalTime]; //  transform from camera to global coo space for (i-1)th camera pose
 
 	device::Mat33& device_Rcurr = device_cast<device::Mat33> (Rcurr);
+	device::Mat33& device_Rcurr_original = device_cast<device::Mat33> (Rcurr_original);
     float3& device_tcurr = device_cast<float3>(tcurr);
 
 	float3 device_volume_size = device_cast<float3>(volumeSize_);
 
 	if(hasTSDFVisualization_) {
-
 		device::raycast(intrinsics, device_Rcurr, device_tcurr, trancDist, device_volume_size, volume_, globalPreviousPointCloud->getVertexMaps()[0], 
 			globalPreviousPointCloud->getNormalMaps()[0], error_);
 
 	} else {
 	
-		device::raycast(intrinsics, device_Rcurr, device_tcurr, trancDist, device_volume_size, volume_, globalPreviousPointCloud->getVertexMaps()[0], 
-			globalPreviousPointCloud->getNormalMaps()[0]);
+		device::raycast(intrinsics, device_Rcurr, device_tcurr, trancDist, device_volume_size, volume_, globalPreviousPointCloud->getVertexMaps()[0], globalPreviousPointCloud->getNormalMaps()[0]);
 
 	}
 

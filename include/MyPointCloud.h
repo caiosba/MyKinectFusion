@@ -45,6 +45,7 @@ public:
 	void getLastFrameNormals(DeviceArray2D<pcl::PointXYZ>& normals);
 	Eigen::Vector3f& getCentroid();
 	void getDepthMap(unsigned short *depthMap);
+        void transformCamera(std::vector<Matrix3frm>& Rcam, std::vector<Vector3f>& tcam, int globalTime);
 
 private:
 	std::vector<device::MapArr> vmaps_;

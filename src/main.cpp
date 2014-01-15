@@ -23,6 +23,7 @@ using namespace pcl::gpu;
 using namespace Eigen;
 
 //Window's size
+
 int windowWidth = 1280;
 int windowHeight = 960;
 
@@ -105,8 +106,8 @@ bool shader=true;
 
 bool showCloud = false;
 bool showRaycasting = true;
-bool showDepthMap = true;
-bool showRGBMap = true;
+bool showDepthMap = false;
+bool showRGBMap = false;
 
 //
 // Global handles for the currently active program object, with its two shader objects
@@ -225,7 +226,7 @@ void loadArguments(int argc, char **argv, Reconstruction *reconstruction)
 	char aux[5];
 	int begin = 0;
 	int end = 0;
-	int threshold = 5000;
+	int threshold = 700; // Decrease this value to remove the background
 	
   if(pcl::console::find_argument(argc, argv, "--cloud") >= 0) {
 	showCloud = true;
@@ -293,7 +294,7 @@ void reshape(int w, int h)
 
 void displayDepthData()
 {
-	glViewport(0, windowHeight/2, windowWidth/2, windowHeight/2);
+	glViewport(windowWidth/2, 0, windowWidth/2, windowHeight/2);
 	glMatrixMode(GL_PROJECTION);          
 	glLoadIdentity();    
 
@@ -316,7 +317,7 @@ void displayRGBData()
 void displayRaycastedData()
 {
 
-	glViewport(windowWidth/2, 0, windowWidth/2, windowHeight/2);
+	glViewport(0, windowHeight/2, windowWidth/2, windowHeight/2);
 	glMatrixMode(GL_PROJECTION);          
 	glLoadIdentity();    
 
@@ -541,6 +542,10 @@ void keyboard(unsigned char key, int x, int y)
 	case 27:
 		exit(0);
 		break;
+	case (int)'z' : case (int)'Z':
+		std::cout << "Changing camera pose..." << std::endl;
+                reconstruction->changePose();
+		break;
 	case (int)'i' : case (int)'I':
 		std::cout << "Head Pose Tracking Activated..." << std::endl;
 		reconstruction->enableOnlyTracking();
@@ -758,7 +763,8 @@ int main(int argc, char **argv) {
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_ALPHA);
 	glutInitWindowSize(windowWidth, windowHeight);
 	glutInit(&argc, argv);
-	glutCreateWindow("My KinFu");
+	glutCreateWindow("KinFuck");
+        printf("LEVELS: %d\n", LEVELS);
 
 	//Initialize glew
 	GLenum err = glewInit();

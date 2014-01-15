@@ -93,7 +93,7 @@ void Image::allocateBuffers(int cols, int rows) {
 
 void Image::getRaycastImage(KinfuTracker::View &viewDevice, Eigen::Vector3f volumeSize, MyPointCloud *globalPreviousPointCloud) {
 
-	const Eigen::Vector3f& lightSourcePose = volumeSize * (-3.f);
+	const Eigen::Vector3f& lightSourcePose = volumeSize * (-3.f); // {0,0,0}
 
 	device::LightSource light;
 	light.number = 1;

@@ -87,6 +87,8 @@ public:
 	bool hasErrorVisualization() { return hasErrorVisualization_; }
 	bool isOnlyTrackingStopped() { return stopTracking_; }
 	bool isOnlyTrackingOn() { return isOnlyTrackingOn_; }
+        void transformCamera(std::vector<Matrix3frm>& Rcam, std::vector<Vector3f>& tcam, int globalTime);
+	void changePose();
 	
 private:
 
@@ -95,6 +97,7 @@ private:
 
 	Image *image_;
 
+	MyPointCloud *firstPointCloud_;
 	MyPointCloud *currentPointCloud_;
 	MyPointCloud *globalPreviousPointCloud_;
 	MyPointCloud *auxPointCloud_;
@@ -107,6 +110,7 @@ private:
 	bool hasIncrement_;
 	bool isOnlyTrackingOn_;
 	bool stopTracking_;
+        bool changePose_;
 
 	int threshold_;
 
