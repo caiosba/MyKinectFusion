@@ -29,6 +29,8 @@ public:
 	
 	std::vector<device::MapArr>& getVertexMaps() { return vmaps_; };
 	std::vector<device::MapArr>& getNormalMaps() { return nmaps_; };
+	std::vector<device::MapArr>& getTempVertexMaps() { return vmapstmp_; };
+	std::vector<device::MapArr>& getTempNormalMaps() { return nmapstmp_; };
 	void getHostErrorInRGB(DeviceArray2D<pcl::PointXYZI>& errorInRGB);
 
 	void setVertexMaps(std::vector<device::MapArr>& vmaps) { vmaps_ = vmaps; };
@@ -49,13 +51,15 @@ public:
 
 private:
 	std::vector<device::MapArr> vmaps_;
-    std::vector<device::MapArr> nmaps_;
+        std::vector<device::MapArr> nmaps_;
+	std::vector<device::MapArr> vmapstmp_;
+        std::vector<device::MapArr> nmapstmp_;
 	std::vector<float> hostError_;
 	int rows_, cols_;
 	int icpIterations_[LEVELS];
 	float  distThres_, angleThres_;
 	DeviceArray2D<float> gbuf_;
-    DeviceArray<float> sumbuf_;
+        DeviceArray<float> sumbuf_;
 	DeviceArray2D<float> error_;
 };
 #endif

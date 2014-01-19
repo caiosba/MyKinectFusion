@@ -321,7 +321,13 @@ void displayRaycastedData()
 	glMatrixMode(GL_PROJECTION);          
 	glLoadIdentity();    
 
-	myGLImageViewer->loadRGBTexture(reconstruction->getRaycastImage(), texVBO, RAYCAST_BO, windowWidth, windowHeight);
+        if (reconstruction->poseChanged()) {
+          printf("Getting image from another pose...\n");
+	  myGLImageViewer->loadRGBTexture(reconstruction->getRaycastImageFromPose(), texVBO, RAYCAST_BO, windowWidth, windowHeight);
+        }
+        else {
+	  myGLImageViewer->loadRGBTexture(reconstruction->getRaycastImage(), texVBO, RAYCAST_BO, windowWidth, windowHeight);
+        }
 	myGLImageViewer->drawRGBTexture(texVBO, RAYCAST_BO, windowWidth, windowHeight);
 
 }
@@ -434,18 +440,7 @@ void displayCloud(bool globalCoordinates = true)
 	myGLCloudViewer->loadIndices(indices, pointCloud);
 	myGLCloudViewer->loadVBOs(meshVBO, indices, pointCloud, normalVector);
 	
-	if(ARPolygonal) {
-		//if(!AR && globalCoordinates)
-			glViewport(0, 0, windowWidth/2, windowHeight/2);
-		//else
-			//glViewport(0, windowHeight/2, windowWidth/2, windowHeight/2);
-	}
-	if(ARVolumetric || ARKinectFusionVolume) {
-		if(globalCoordinates)
-			glViewport(0, 0, windowWidth/2, windowHeight/2);
-		else
-			glViewport(0, windowHeight/2, windowWidth/2, windowHeight/2);
-	}
+	glViewport(0, windowHeight/2, windowWidth/2, windowHeight/2);
 
 	glMatrixMode(GL_PROJECTION);          
 	glLoadIdentity(); 

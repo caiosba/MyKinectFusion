@@ -32,6 +32,7 @@ public:
 	device::DepthMap getDepthDevice() { return depthDevice_; };
 	KinfuTracker::View getRgbDevice() { return rgbDevice_; };
 	void getRaycastImage(KinfuTracker::View &viewDevice, Eigen::Vector3f volumeSize, MyPointCloud *globalPreviousPointCloud);
+	void getRaycastImageFromPose(KinfuTracker::View &viewDevice, Eigen::Vector3f volumeSize, MyPointCloud *globalPreviousPointCloud);
 	device::Intr& getIntrinsics() { return intrinsics; }
 	float getTrancationDistance() { return trancationDistance_; }
 	DeviceArray2D<float>& getDepthRawScaled() { return depthRawScaled_; }

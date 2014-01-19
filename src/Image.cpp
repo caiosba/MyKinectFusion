@@ -103,3 +103,16 @@ void Image::getRaycastImage(KinfuTracker::View &viewDevice, Eigen::Vector3f volu
 	generateImage (globalPreviousPointCloud->getVertexMaps()[0], globalPreviousPointCloud->getNormalMaps()[0], light, viewDevice);
 
 }
+
+void Image::getRaycastImageFromPose(KinfuTracker::View &viewDevice, Eigen::Vector3f volumeSize, MyPointCloud *globalPreviousPointCloud) {
+
+	const Eigen::Vector3f& lightSourcePose = volumeSize * (-3.f); // {0,0,0}
+
+	device::LightSource light;
+	light.number = 1;
+	light.pos[0] = device_cast<const float3>(lightSourcePose);
+
+	viewDevice.create(rows_, cols_);
+	generateImage (globalPreviousPointCloud->getTempVertexMaps()[0], globalPreviousPointCloud->getTempNormalMaps()[0], light, viewDevice);
+
+}

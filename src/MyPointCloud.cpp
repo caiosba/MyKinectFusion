@@ -13,6 +13,8 @@ MyPointCloud::MyPointCloud(int cols, int rows) {
 
 	vmaps_.resize(LEVELS);
 	nmaps_.resize(LEVELS);
+	vmapstmp_.resize(LEVELS);
+	nmapstmp_.resize(LEVELS);
 
 	for(int i = 0; i < LEVELS; ++i) {
 	
@@ -21,6 +23,8 @@ MyPointCloud::MyPointCloud(int cols, int rows) {
 
 		vmaps_[i].create(pyr_rows * 3, pyr_cols);
 		nmaps_[i].create(pyr_rows * 3, pyr_cols);
+		vmapstmp_[i].create(pyr_rows * 3, pyr_cols);
+		nmapstmp_[i].create(pyr_rows * 3, pyr_cols);
 
 	}
 

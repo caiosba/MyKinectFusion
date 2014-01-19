@@ -146,8 +146,13 @@ void Reconstruction::run(boost::shared_ptr<openni_wrapper::Image>& rgbImage, boo
       if (!hasImage_) reset();
       else {
         tsdfVolume_->integrateVolume(rmats_, tvecs_, depthDevice, image_->getIntrinsics(), image_->getTrancationDistance(), image_->getDepthRawScaled(), globalTime);
-        if (changePose_) this->transformCamera(rmats_, tvecs_, globalTime);
-        tsdfVolume_->raycast(rmats_, tvecs_, image_->getIntrinsics(), image_->getTrancationDistance(), globalPreviousPointCloud_, globalTime);
+        // if (changePose_) this->transformCamera(rmats_, tvecs_, globalTime);
+        if (changePose_) {
+          tsdfVolume_->raycastFromPose(rmats_, tvecs_, image_->getIntrinsics(), image_->getTrancationDistance(), globalPreviousPointCloud_, globalTime);
+        }
+        else {
+          tsdfVolume_->raycast(rmats_, tvecs_, image_->getIntrinsics(), image_->getTrancationDistance(), globalPreviousPointCloud_, globalTime);
+        }
         pcl::device::sync ();
       }
     }
@@ -198,14 +203,21 @@ void Reconstruction::transformGlobalPreviousPointCloud(Eigen::Matrix3f& Rinc, Ei
 }
  
 unsigned char* Reconstruction::getRaycastImage() {
-  
   int cols;
   Eigen::Vector3f cpuVolumeSize = tsdfVolume_->getVolumeSize();
   image_->getRaycastImage(viewDevice_, cpuVolumeSize, globalPreviousPointCloud_);
   viewDevice_.download (view_host_, cols);
 
   return (unsigned char*)view_host_.data();
+}
 
+unsigned char* Reconstruction::getRaycastImageFromPose() {
+  int cols;
+  Eigen::Vector3f cpuVolumeSize = tsdfVolume_->getVolumeSize();
+  image_->getRaycastImageFromPose(viewDevice_, cpuVolumeSize, globalPreviousPointCloud_);
+  viewDevice_.download (view_host_, cols);
+
+  return (unsigned char*)view_host_.data();
 }
 
 void Reconstruction::getPointCloud(float *pointCloud, bool globalCoordinates) {

@@ -63,7 +63,9 @@ public:
 	unsigned short* getCurrentDepthMap() { return (unsigned short*)depthMap.data; }
 	const unsigned char* getRGBMap() { return (const unsigned char*)rgbMap.data; }
 	unsigned char* getRaycastImage();
+	unsigned char* getRaycastImageFromPose();
 	bool hasImage() { return hasImage_; }
+	bool poseChanged() { return changePose_; }
 	void getPointCloud(float *pointCloud, bool globalCoordinates = true);
 	void getNormalVector(float *normalVector, bool globalCoordinates = true);
 	Eigen::Vector3f getCurrentTranslation() { return tvecs_[globalTime - 1]; }
