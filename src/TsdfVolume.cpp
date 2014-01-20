@@ -81,7 +81,7 @@ void TsdfVolume::raycast(std::vector<Matrix3frm>& rmats, std::vector<Vector3f>& 
     }
 }
 
-void TsdfVolume::raycastFromPose(std::vector<Matrix3frm>& rmats, std::vector<Vector3f>& tvecs, device::Intr& intrinsics, float trancDist, MyPointCloud *globalPreviousPointCloud, int globalTime) {
+void TsdfVolume::raycastFromPose(std::vector<Matrix3frm>& rmats, std::vector<Vector3f>& tvecs, device::Intr& intrinsics, float trancDist, MyPointCloud *globalPreviousPointCloud, int globalTime, Matrix3frm pose_rmats, Vector3f pose_tvecs) {
 
   // FIXME: Need to change it to independent camera pose
   Matrix3frm rmatz;
@@ -93,8 +93,8 @@ void TsdfVolume::raycastFromPose(std::vector<Matrix3frm>& rmats, std::vector<Vec
   tvecz = {0, 0, 20};
   // Test data end
 
-  Matrix3frm Rcurr = rmats[globalTime]; // + rmatz; //  [Ri|ti] - pos of camera, i.e.
-  Vector3f tcurr = tvecs[globalTime]; // + tvecz; //  transform from camera to global coo space for (i-1)th camera pose
+  Matrix3frm Rcurr = pose_rmats; // rmats[globalTime]; // + rmatz; //  [Ri|ti] - pos of camera, i.e.
+  Vector3f tcurr = pose_tvecs; // tvecs[globalTime]; // + tvecz; //  transform from camera to global coo space for (i-1)th camera pose
   printf("Matrix:\n");
   cout << Rcurr << endl;
   

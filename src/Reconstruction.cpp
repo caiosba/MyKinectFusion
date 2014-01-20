@@ -58,6 +58,16 @@ void Reconstruction::transformCamera(std::vector<Matrix3frm>& Rcam, std::vector<
    // tcam[globalTime] = tcam[globalTime] + tvecz; 
 }
 
+pcl::PointCloud<pcl::PointXYZ>::Ptr Reconstruction::getPCLPointCloud() {
+  DeviceArray<pcl::PointXYZ> extractedCloudDevice;
+  DeviceArray<PointXYZ> extracted =  tsdfVolume_->fetchCloud(extractedCloudDevice);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr hostCloud = pcl::PointCloud<PointXYZ>::Ptr (new PointCloud<PointXYZ>);
+  extracted.download(hostCloud->points);
+  hostCloud->width = (int)hostCloud->points.size ();
+  hostCloud->height = 1;
+  return hostCloud;
+}
+
 void Reconstruction::savePointCloud() {
   
   DeviceArray<pcl::PointXYZ> extractedCloudDevice;
@@ -148,7 +158,7 @@ void Reconstruction::run(boost::shared_ptr<openni_wrapper::Image>& rgbImage, boo
         tsdfVolume_->integrateVolume(rmats_, tvecs_, depthDevice, image_->getIntrinsics(), image_->getTrancationDistance(), image_->getDepthRawScaled(), globalTime);
         // if (changePose_) this->transformCamera(rmats_, tvecs_, globalTime);
         if (changePose_) {
-          tsdfVolume_->raycastFromPose(rmats_, tvecs_, image_->getIntrinsics(), image_->getTrancationDistance(), globalPreviousPointCloud_, globalTime);
+          tsdfVolume_->raycastFromPose(rmats_, tvecs_, image_->getIntrinsics(), image_->getTrancationDistance(), globalPreviousPointCloud_, globalTime, pose_rmats_, pose_tvecs_);
         }
         else {
           tsdfVolume_->raycast(rmats_, tvecs_, image_->getIntrinsics(), image_->getTrancationDistance(), globalPreviousPointCloud_, globalTime);

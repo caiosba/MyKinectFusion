@@ -65,7 +65,6 @@ public:
 	unsigned char* getRaycastImage();
 	unsigned char* getRaycastImageFromPose();
 	bool hasImage() { return hasImage_; }
-	bool poseChanged() { return changePose_; }
 	void getPointCloud(float *pointCloud, bool globalCoordinates = true);
 	void getNormalVector(float *normalVector, bool globalCoordinates = true);
 	Eigen::Vector3f getCurrentTranslation() { return tvecs_[globalTime - 1]; }
@@ -89,8 +88,14 @@ public:
 	bool hasErrorVisualization() { return hasErrorVisualization_; }
 	bool isOnlyTrackingStopped() { return stopTracking_; }
 	bool isOnlyTrackingOn() { return isOnlyTrackingOn_; }
-        void transformCamera(std::vector<Matrix3frm>& Rcam, std::vector<Vector3f>& tcam, int globalTime);
+  void transformCamera(std::vector<Matrix3frm>& Rcam, std::vector<Vector3f>& tcam, int globalTime);
 	void changePose();
+  pcl::PointCloud<pcl::PointXYZ>::Ptr getPCLPointCloud();
+	Matrix3frm getPoseR() { return pose_rmats_; }
+	Vector3f getPoseT() { return pose_tvecs_; }
+  void setPoseR(Matrix3frm r) { pose_rmats_ = r; }
+  void setPoseT(Vector3f t) { pose_tvecs_ = t; }
+  bool poseChanged() { return changePose_; }
 	
 private:
 
@@ -144,6 +149,8 @@ private:
 
 	void *headPoseEstimationMediator;
 	bool headPoseEstimationOk;
+  Matrix3frm pose_rmats_;
+  Vector3f pose_tvecs_;
 };
 
 #endif

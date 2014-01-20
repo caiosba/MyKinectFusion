@@ -108,9 +108,9 @@ bool MyPointCloud::alignPointClouds(std::vector<Matrix3frm>& Rcam, std::vector<V
 			float det = A.determinant ();
 
 			if (fabs (det) < 1e-15 || !pcl::device::valid_host (det)) {
-				printf("ICP failed at level %d, iteration %d (global time %d)\n", level, iteration, globalTime);
+				// printf("ICP failed at level %d, iteration %d (global time %d)\n", level, iteration, globalTime);
 				return (false);
-			} else printf("ICP succeed at level %d, iteration %d (global time %d)\n", level, iteration, globalTime);
+			} //else printf("ICP succeed at level %d, iteration %d (global time %d)\n", level, iteration, globalTime);
 
 			Eigen::Matrix<float, 6, 1> result = A.llt ().solve (b);
 			//Eigen::Matrix<float, 6, 1> result = A.jacobiSvd(ComputeThinU | ComputeThinV).solve(b);

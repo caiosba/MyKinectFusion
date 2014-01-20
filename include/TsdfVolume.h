@@ -32,7 +32,7 @@ public:
 	void integrateVolume(std::vector<Matrix3frm>& rmats, std::vector<Vector3f>& tvecs, device::DepthMap &depthRaw, device::Intr& intrinsics,
 	float trancDist, DeviceArray2D<float>& depthRawScaled, int globalTime);
 	void raycast(std::vector<Matrix3frm>& rmats, std::vector<Vector3f>& tvecs, device::Intr& intrinsics, float trancDist, MyPointCloud *globalPreviousPointCloud, int globalTime);
-	void raycastFromPose(std::vector<Matrix3frm>& rmats, std::vector<Vector3f>& tvecs, device::Intr& intrinsics, float trancDist, MyPointCloud *globalPreviousPointCloud, int globalTime);
+	void raycastFromPose(std::vector<Matrix3frm>& rmats, std::vector<Vector3f>& tvecs, device::Intr& intrinsics, float trancDist, MyPointCloud *globalPreviousPointCloud, int globalTime, Matrix3frm pose_rmats, Vector3f pose_tvecs);
 	DeviceArray<PointXYZ> fetchCloud(DeviceArray<PointXYZ>& cloud_buffer);
 
 	//10 * 1000 * 1000

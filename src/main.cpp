@@ -16,6 +16,12 @@
 #include "Mediators/HeadPoseEstimationMediator.h"
 #include "Kinect.h"
 #include "FaceDetection.h"
+#include <iostream>
+#include <boost/thread/thread.hpp>
+#include <pcl/common/common_headers.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#include <vtkCamera.h>
 
 using namespace std;
 using namespace pcl;
@@ -737,14 +743,64 @@ void initGL()
 
 }
 
+void* pcl_viewer_thread(void* param) {
+  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("Cloud Viewer"));
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PointCloud<pcl::PointXYZ>& cloud = *cloud_ptr;
+    
+  viewer->setBackgroundColor(0, 0, 0.15);
+  viewer->setPointCloudRenderingProperties(visualization::PCL_VISUALIZER_POINT_SIZE, 1);
+  viewer->initCameraParameters();
+  viewer->setCameraClipDistances(0.01, 10.01);
+  viewer->setShowFPS(false);
+  pcl::visualization::Camera camera;
+  bool gotCamera = false;
+
+  while (!viewer->wasStopped())
+  {
+    boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+
+    if (reconstruction->poseChanged()) {
+      Eigen::Affine3f pose;
+      pose = viewer->getViewerPose();
+      Matrix3frm rotation = pose.linear();
+      Matrix3f axis_reorder;
+      // Rotation of 180° on Z 
+      axis_reorder << -1,  0, 0,
+                       0, -1, 0,
+                       0,  0, 1;
+      rotation = rotation * axis_reorder;
+      reconstruction->setPoseR(rotation);
+      reconstruction->setPoseT(pose.translation());
+    }
+    else {
+      viewer->removeAllPointClouds();
+      cloud_ptr = reconstruction->getPCLPointCloud();
+      viewer->addPointCloud<pcl::PointXYZ> (cloud_ptr);
+      if (!gotCamera) {
+        viewer->resetCamera();
+        std::vector<pcl::visualization::Camera> cameras;
+        viewer->getCameras(cameras);
+        camera = cameras[0];
+        camera.view[1] *= -1;
+        gotCamera = true;
+      }
+      viewer->setCameraParameters(camera);
+    }
+
+    viewer->spinOnce(100);
+  }
+}
+
 int main(int argc, char **argv) {
 
   pcl::gpu::setDevice (0);
   pcl::gpu::printShortCudaDeviceInfo (0);
-
+  
   //This argument is an exception. It is loaded first because it is necessary to instantiate the Reconstruction object
   Eigen::Vector3i volumeSize(3000, 3000, 3000); //mm
-  if(pcl::console::parse_3x_arguments(argc, argv, "--volumesize", volumeSize(0), volumeSize(1), volumeSize(2)) >= 0) {
+  if (pcl::console::parse_3x_arguments(argc, argv, "--volumesize", volumeSize(0), volumeSize(1), volumeSize(2)) >= 0) {
   }
   
   try
@@ -753,13 +809,17 @@ int main(int argc, char **argv) {
 	reconstruction = new Reconstruction(volumeSize);
 	kinect = new Kinect();
 	loadArguments(argc, argv, reconstruction);
+
+  // Initialize a thread for cloud visualization, which needs access to the cloud
+  pthread_t thread_id;
+  pthread_create(&thread_id, NULL, pcl_viewer_thread, (void *)&reconstruction);
 	
 	//Initialize the GL window
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_ALPHA);
 	glutInitWindowSize(windowWidth, windowHeight);
 	glutInit(&argc, argv);
-	glutCreateWindow("KinFuck");
-        printf("LEVELS: %d\n", LEVELS);
+	glutCreateWindow("KinFu");
+  printf("LEVELS: %d\n", LEVELS);
 
 	//Initialize glew
 	GLenum err = glewInit();
