@@ -9,6 +9,9 @@ apt-get update
 # Some utilities that your computer must have
 apt-get install git-core unzip cmake-curses-gui g++ libcudart4 nvidia-cuda-dev nvidia-cuda-doc nvidia-cuda-gdb nvidia-cuda-toolkit python-pycuda python-pycuda-doc python-pycuda-headers libpcl-all libglew1.6-dev libglew1.6 freeglut3-dev freeglut3 libopencv-core-dev libopencv-core2.3 libopencv-contrib2.3 libopencv-contrib-dev libopencv-dev libopencv-flann2.3 libopencv-flann-dev libopencv-highgui-dev libopencv-highgui2.3 libopencv-imgproc2.3 libopencv-imgproc-dev cmake-curses-gui libhighgui-dev libcv-dev
 
+# If Kinect is not found, use drivers from ps-engine package:
+apt-get install ps-engine
+
 # Use custom opencv2 version (Debian Squeeze version, works on Ubuntu 12.04)
 rm -rf /usr/local/include/opencv2
 cp -r lib/opencv2 /usr/local/include/
