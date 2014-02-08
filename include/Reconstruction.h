@@ -96,6 +96,7 @@ public:
   void setPoseR(Matrix3frm r) { pose_rmats_ = r; }
   void setPoseT(Vector3f t) { pose_tvecs_ = t; }
   bool poseChanged() { return changePose_; }
+	void readPoseFromFile();
 	
 private:
 

@@ -6,3 +6,4 @@ KinectFusion
 *.swp
 *.swo
 *~
+*.yml*

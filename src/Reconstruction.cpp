@@ -1,5 +1,7 @@
 #include "Reconstruction.h"
 #include <math.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/core/eigen.hpp>
 #define PI 3.14159265
 
 #define _CRT_SECURE_NO_DEPRECATE
@@ -107,6 +109,37 @@ void Reconstruction::reset() {
 
 }
 
+void Reconstruction::readPoseFromFile() {
+  // return;
+  cout << "Using transformation from file" << endl;
+  Matrix3frm rcurr = this->getCurrentRotation();
+	Vector3f tcurr = this->getCurrentTranslation();
+  Matrix3frm ri = this->getRotationMatrices()[0];
+	Vector3f ti = this->getTranslationVectors()[0];
+
+  cv::FileStorage fs;
+  fs.open("mystereocalib.yml", cv::FileStorage::READ);
+	cv::Mat r, t;
+	Matrix3frm r2;
+	Vector3f t2;
+	fs["R"] >> r;
+	fs["T"] >> t;
+	cv2eigen(r, r2);
+	cv2eigen(t, t2);
+	fs.release();
+	Vector3f t3;
+  t3 = {0, 0, 300};
+	Matrix3frm rotation = rcurr * r2.inverse();
+	Vector3f translation = (tcurr + t3) + t2;
+
+  // Debug
+	cout << rotation << endl;
+	cout << translation << endl;
+	
+	this->setPoseR(rotation);
+  this->setPoseT(translation);
+}
+
 void Reconstruction::run(boost::shared_ptr<openni_wrapper::Image>& rgbImage, boost::shared_ptr<openni_wrapper::DepthImage>& depthImage) {
   printf("Running...\n");
   depthMap = image_->getDepthMap();
@@ -158,6 +191,7 @@ void Reconstruction::run(boost::shared_ptr<openni_wrapper::Image>& rgbImage, boo
         tsdfVolume_->integrateVolume(rmats_, tvecs_, depthDevice, image_->getIntrinsics(), image_->getTrancationDistance(), image_->getDepthRawScaled(), globalTime);
         // if (changePose_) this->transformCamera(rmats_, tvecs_, globalTime);
         if (changePose_) {
+          this->readPoseFromFile();
           tsdfVolume_->raycastFromPose(rmats_, tvecs_, image_->getIntrinsics(), image_->getTrancationDistance(), globalPreviousPointCloud_, globalTime, pose_rmats_, pose_tvecs_);
         }
         else {

@@ -232,7 +232,7 @@ void loadArguments(int argc, char **argv, Reconstruction *reconstruction)
 	char aux[5];
 	int begin = 0;
 	int end = 0;
-	int threshold = 700; // Decrease this value to remove the background
+	int threshold = 1000; // Decrease this value to remove the background
 	
   if(pcl::console::find_argument(argc, argv, "--cloud") >= 0) {
 	showCloud = true;
@@ -545,7 +545,7 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case (int)'z' : case (int)'Z':
 		std::cout << "Changing camera pose..." << std::endl;
-                reconstruction->changePose();
+    reconstruction->changePose();
 		break;
 	case (int)'i' : case (int)'I':
 		std::cout << "Head Pose Tracking Activated..." << std::endl;
@@ -773,6 +773,8 @@ void* pcl_viewer_thread(void* param) {
       rotation = rotation * axis_reorder;
       reconstruction->setPoseR(rotation);
       reconstruction->setPoseT(pose.translation());
+			cout << rotation << endl;
+			cout << pose.translation() << endl;
     }
     else {
       viewer->removeAllPointClouds();
@@ -811,8 +813,10 @@ int main(int argc, char **argv) {
 	loadArguments(argc, argv, reconstruction);
 
   // Initialize a thread for cloud visualization, which needs access to the cloud
+	/*
   pthread_t thread_id;
   pthread_create(&thread_id, NULL, pcl_viewer_thread, (void *)&reconstruction);
+	*/
 	
 	//Initialize the GL window
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_ALPHA);

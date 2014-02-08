@@ -83,20 +83,8 @@ void TsdfVolume::raycast(std::vector<Matrix3frm>& rmats, std::vector<Vector3f>& 
 
 void TsdfVolume::raycastFromPose(std::vector<Matrix3frm>& rmats, std::vector<Vector3f>& tvecs, device::Intr& intrinsics, float trancDist, MyPointCloud *globalPreviousPointCloud, int globalTime, Matrix3frm pose_rmats, Vector3f pose_tvecs) {
 
-  // FIXME: Need to change it to independent camera pose
-  Matrix3frm rmatz;
-  int angle = 90;
-  rmatz << cos(angle*PI/180), -sin(angle*PI/180), 0,
-           sin(angle*PI/180), cos(angle*PI/180), 0,
-           0, 0, 1;
-  Vector3f tvecz;
-  tvecz = {0, 0, 20};
-  // Test data end
-
-  Matrix3frm Rcurr = pose_rmats; // rmats[globalTime]; // + rmatz; //  [Ri|ti] - pos of camera, i.e.
-  Vector3f tcurr = pose_tvecs; // tvecs[globalTime]; // + tvecz; //  transform from camera to global coo space for (i-1)th camera pose
-  printf("Matrix:\n");
-  cout << Rcurr << endl;
+  Matrix3frm Rcurr = pose_rmats;
+  Vector3f tcurr = pose_tvecs;
   
   device::Mat33& device_Rcurr = device_cast<device::Mat33> (Rcurr);
   float3& device_tcurr = device_cast<float3>(tcurr);
@@ -108,7 +96,6 @@ void TsdfVolume::raycastFromPose(std::vector<Matrix3frm>& rmats, std::vector<Vec
 
   device::raycast(intrinsics, device_Rcurr, device_tcurr, trancDist, device_volume_size, volume_, vmaps[0], nmaps[0]);
 
-  // What is it for?
   for (int i = 1; i < LEVELS; ++i) {
     device::resizeVMap(vmaps[i-1], vmaps[i]);
     device::resizeNMap(nmaps[i-1], nmaps[i]);
