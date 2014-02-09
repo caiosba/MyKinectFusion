@@ -127,15 +127,13 @@ void Reconstruction::readPoseFromFile() {
 	cv2eigen(r, r2);
 	cv2eigen(t, t2);
 	fs.release();
-	Vector3f t3;
-  t3 = {0, 0, 300};
-	Matrix3frm rotation = rcurr * r2.inverse();
-	Vector3f translation = (tcurr + t3) + t2;
+	Matrix3frm rotation = r2.inverse() * rcurr;
+	Vector3f translation = r2.inverse() * tcurr + t2;
 
   // Debug
 	cout << rotation << endl;
 	cout << translation << endl;
-	
+
 	this->setPoseR(rotation);
   this->setPoseT(translation);
 }

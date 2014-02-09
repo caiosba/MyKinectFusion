@@ -22,11 +22,17 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <vtkCamera.h>
+#include "opencv2/core/core.hpp"
+#include <opencv2/highgui/highgui.hpp>
+#include "opencv2/calib3d/calib3d.hpp"
+#include <opencv2/imgproc/imgproc.hpp>
+#include "opencv2/contrib/contrib.hpp"
 
 using namespace std;
 using namespace pcl;
 using namespace pcl::gpu;
 using namespace Eigen;
+using namespace cv;
 
 //Window's size
 
@@ -113,7 +119,7 @@ bool shader=true;
 bool showCloud = false;
 bool showRaycasting = true;
 bool showDepthMap = false;
-bool showRGBMap = false;
+bool showRGBMap = true;
 
 //
 // Global handles for the currently active program object, with its two shader objects
@@ -232,7 +238,7 @@ void loadArguments(int argc, char **argv, Reconstruction *reconstruction)
 	char aux[5];
 	int begin = 0;
 	int end = 0;
-	int threshold = 1000; // Decrease this value to remove the background
+	int threshold = 700; // Decrease this value to remove the background
 	
   if(pcl::console::find_argument(argc, argv, "--cloud") >= 0) {
 	showCloud = true;
@@ -314,10 +320,17 @@ void displayRGBData()
 	glViewport(windowWidth/2, windowHeight/2, windowWidth/2, windowHeight/2);
 	glMatrixMode(GL_PROJECTION);          
 	glLoadIdentity(); 
-
-	myGLImageViewer->loadRGBTexture(reconstruction->getRGBMap(), texVBO, REAL_RGB_BO, windowWidth, windowHeight);
+  if (reconstruction->poseChanged()) {
+    Mat img;
+    VideoCapture cap = VideoCapture(1); // Change ID in order to change camera
+    cap >> img;
+    cvtColor(img, img, CV_BGR2RGB);
+    myGLImageViewer->loadRGBTexture((const unsigned char*)img.data, texVBO, REAL_RGB_BO, windowWidth, windowHeight);
+  }
+  else {
+	  myGLImageViewer->loadRGBTexture(reconstruction->getRGBMap(), texVBO, REAL_RGB_BO, windowWidth, windowHeight);
+	}
 	myGLImageViewer->drawRGBTexture(texVBO, REAL_RGB_BO, windowWidth, windowHeight);
-
 }
 
 void displayRaycastedData()
