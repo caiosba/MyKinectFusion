@@ -335,20 +335,31 @@ void displayRGBData()
 
 void displayRaycastedData()
 {
-
 	glViewport(0, windowHeight/2, windowWidth/2, windowHeight/2);
 	glMatrixMode(GL_PROJECTION);          
-	glLoadIdentity();    
-
-        if (reconstruction->poseChanged()) {
-          printf("Getting image from another pose...\n");
-	  myGLImageViewer->loadRGBTexture(reconstruction->getRaycastImageFromPose(), texVBO, RAYCAST_BO, windowWidth, windowHeight);
-        }
-        else {
+	glLoadIdentity();
+  if (reconstruction->poseChanged()) {
+    Mat bg;
+    VideoCapture cap = VideoCapture(1); // Change ID in order to change camera
+    cap >> bg;
+    cvtColor(bg, bg, CV_BGR2RGB);
+		Mat image = Mat(480, 640, CV_8UC3, reconstruction->getRaycastImageFromPose());
+		for (int i=0; i < image.rows; i++) {
+			for (int j=0; j < image.cols; j++) {
+			  // FIXME: This is slow, replace by faster method
+				if (image.at<cv::Vec3b>(i,j)[0] == 0 && image.at<cv::Vec3b>(i,j)[1] == 0 && image.at<cv::Vec3b>(i,j)[2] == 0) {
+			    image.at<cv::Vec3b>(i,j)[0] = bg.at<cv::Vec3b>(i,j)[0];
+			    image.at<cv::Vec3b>(i,j)[1] = bg.at<cv::Vec3b>(i,j)[1];
+			    image.at<cv::Vec3b>(i,j)[2] = bg.at<cv::Vec3b>(i,j)[2];
+				}
+      }
+		}
+		myGLImageViewer->loadRGBTexture((const unsigned char*)image.data, texVBO, RAYCAST_BO, windowWidth, windowHeight);
+  }
+  else {
 	  myGLImageViewer->loadRGBTexture(reconstruction->getRaycastImage(), texVBO, RAYCAST_BO, windowWidth, windowHeight);
-        }
+  }
 	myGLImageViewer->drawRGBTexture(texVBO, RAYCAST_BO, windowWidth, windowHeight);
-
 }
 
 void displayARDataFromVolume()

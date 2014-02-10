@@ -127,6 +127,7 @@ void Reconstruction::readPoseFromFile() {
 	cv2eigen(r, r2);
 	cv2eigen(t, t2);
 	fs.release();
+
 	Matrix3frm rotation = r2.inverse() * rcurr;
 	Vector3f translation = r2.inverse() * tcurr + t2;
 
