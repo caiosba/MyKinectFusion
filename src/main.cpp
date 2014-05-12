@@ -819,6 +819,61 @@ void* pcl_viewer_thread(void* param) {
   }
 }
 
+void* pcl_viewer_thread_virtual_object(void* param) {
+  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("Virtual Object Cloud Viewer"));
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
+	if (pcl::io::loadPCDFile<pcl::PointXYZ> ("hat.pcd", *cloud_ptr) == -1) {
+	  printf("Could not load virtual object from PCD file.\n");
+	  return (-1);
+	}
+  pcl::PointCloud<pcl::PointXYZ>& cloud = *cloud_ptr;
+
+  viewer->setBackgroundColor(0, 0, 0.15);
+  viewer->setPointCloudRenderingProperties(visualization::PCL_VISUALIZER_POINT_SIZE, 1);
+  viewer->initCameraParameters();
+  viewer->setCameraClipDistances(0.01, 10.01);
+  viewer->setShowFPS(false);
+  pcl::visualization::Camera camera;
+  bool gotCamera = false;
+
+  while (!viewer->wasStopped())
+  {
+    boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+
+    if (reconstruction->poseChanged()) {
+      Eigen::Affine3f pose;
+      pose = viewer->getViewerPose();
+      Matrix3frm rotation = pose.linear();
+      Matrix3f axis_reorder;
+      // Rotation of 180° on Z 
+      axis_reorder << -1,  0, 0,
+                       0, -1, 0,
+                       0,  0, 1;
+      rotation = rotation * axis_reorder;
+      reconstruction->setPoseR(rotation);
+      reconstruction->setPoseT(pose.translation());
+			cout << rotation << endl;
+			cout << pose.translation() << endl;
+    }
+    else {
+      viewer->removeAllPointClouds();
+      viewer->addPointCloud<pcl::PointXYZ> (cloud_ptr);
+      if (!gotCamera) {
+        viewer->resetCamera();
+        std::vector<pcl::visualization::Camera> cameras;
+        viewer->getCameras(cameras);
+        camera = cameras[0];
+        camera.view[1] *= -1;
+        gotCamera = true;
+      }
+      viewer->setCameraParameters(camera);
+    }
+
+    viewer->spinOnce(100);
+  }   
+}
+
 int main(int argc, char **argv) {
 
   pcl::gpu::setDevice (0);
@@ -837,10 +892,15 @@ int main(int argc, char **argv) {
 	loadArguments(argc, argv, reconstruction);
 
   // Initialize a thread for cloud visualization, which needs access to the cloud
+	// Uncomment here and comment line 193 on src/Reconstruction.cpp in order to enable independent camera
 	/*
   pthread_t thread_id;
   pthread_create(&thread_id, NULL, pcl_viewer_thread, (void *)&reconstruction);
 	*/
+
+  // Cloud AR
+  // pthread_t thread_id2;
+  // pthread_create(&thread_id2, NULL, pcl_viewer_thread_virtual_object, (void *)&reconstruction);
 	
 	//Initialize the GL window
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_ALPHA);

@@ -8,5 +8,9 @@ running "make", try removing /usr/include/pcl/gpu, running make, putting the "gp
 
 You may also need to set the path to libcuda.so, which can change from system to system depending on the driver version.
 
+Todo:
+
+* Improve stereo calibration
+
 References:
 https://github.com/MarcioCerqueira/MyKinectFusion
