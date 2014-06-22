@@ -97,6 +97,12 @@ public:
   void setPoseT(Vector3f t) { pose_tvecs_ = t; }
   bool poseChanged() { return changePose_; }
 	void readPoseFromFile();
+	long getGlassesYaw() { return glasses_yaw_; }
+	void setGlassesYaw(long y) { glasses_yaw_ = y; }
+	long getGlassesPitch() { return glasses_pitch_; }
+	void setGlassesPitch(long p) { glasses_pitch_ = p; }
+	long getGlassesRoll() { return glasses_roll_; }
+	void setGlassesRoll(long r) { glasses_roll_ = r; }
 	
 private:
 
@@ -152,6 +158,9 @@ private:
 	bool headPoseEstimationOk;
   Matrix3frm pose_rmats_;
   Vector3f pose_tvecs_;
+	long glasses_yaw_;
+	long glasses_pitch_;
+	long glasses_roll_;
 };
 
 #endif

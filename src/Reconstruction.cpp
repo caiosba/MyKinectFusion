@@ -128,12 +128,31 @@ void Reconstruction::readPoseFromFile() {
 	cv2eigen(t, t2);
 	fs.release();
 
+  // Transform based on calibration
 	Matrix3frm rotation = r2.inverse() * rcurr;
 	Vector3f translation = r2.inverse() * tcurr + t2;
+
+	// Transform based on glasses
+	long yaw = this->getGlassesYaw();
+	long pitch = this->getGlassesPitch();
+	long roll = this->getGlassesRoll();
+	Matrix3frm yaw_rm, pitch_rm, roll_rm;
+	double y, p, ro;
+	y = yaw * PI / 180.0;
+	p = pitch * PI / 180.0;
+	ro = roll * PI / 180.0;
+  Eigen::Quaternion<double> q = Eigen::AngleAxisd(ro, Eigen::Vector3d::UnitZ()) * Eigen::AngleAxisd(y, Eigen::Vector3d::UnitY()) * Eigen::AngleAxisd(p, Eigen::Vector3d::UnitX()); 
+
+  Matrix3d qm;
+	qm = q.matrix();
+  Matrix3frm rm;
+	rm = qm.cast<float>();
+	rotation = rm * rotation;
 
   // Debug
 	cout << rotation << endl;
 	cout << translation << endl;
+	printf("Yaw: %ld Pitch: %ld Roll: %ld\n", (long)yaw, (long)pitch, (long)roll);
 
 	this->setPoseR(rotation);
   this->setPoseT(translation);
