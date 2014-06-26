@@ -29,6 +29,10 @@ Reconstruction::Reconstruction(Eigen::Vector3i& volumeSize) {
   globalPreviousPointCloud_ = new MyPointCloud(640, 480);
   auxPointCloud_ = new MyPointCloud(640, 480);
 
+	enableYawPitchRollFromGlasses = true;
+	enableXYZFromGlasses = true;
+	enableGlasses = true;
+
   float f = 525.f;
   image_->setDepthIntrinsics(f, f);
   image_->setTrancationDistance(tsdfVolume_->getVolumeSize());
@@ -104,9 +108,7 @@ void Reconstruction::reset() {
     hasIncrement_ = false;
 
     std::cout << "Reset" << std::endl;
-  
   }
-
 }
 
 void Reconstruction::readPoseFromFile() {
@@ -128,38 +130,58 @@ void Reconstruction::readPoseFromFile() {
 	cv2eigen(t, t2);
 	fs.release();
 
-  // Transform based on calibration
+  // Transform based on calibration file
 	Matrix3frm rotation = r2.inverse() * rcurr;
 	Vector3f translation = r2.inverse() * tcurr + t2;
 
-	// Transform based on glasses
-	long yaw = this->getGlassesYaw();
-	long pitch = this->getGlassesPitch();
-	long roll = this->getGlassesRoll();
-	Matrix3frm yaw_rm, pitch_rm, roll_rm;
-	double y, p, ro;
-	y = yaw * PI / 180.0;
-	p = pitch * PI / 180.0;
-	ro = roll * PI / 180.0;
-  Eigen::Quaternion<double> q = Eigen::AngleAxisd(ro, Eigen::Vector3d::UnitZ()) * Eigen::AngleAxisd(y, Eigen::Vector3d::UnitY()) * Eigen::AngleAxisd(p, Eigen::Vector3d::UnitX()); 
+  // Transformation based on glasses
+	if (this->useGlasses()) {
 
-  Matrix3d qm;
-	qm = q.matrix();
-  Matrix3frm rm;
-	rm = qm.cast<float>();
-	rotation = rm * rotation;
+	  // Rotation based on accelerometer from glasses
+	  long yaw = this->getGlassesYaw();
+	  long pitch = this->getGlassesPitch();
+	  long roll = this->getGlassesRoll();
+	  Matrix3frm yaw_rm, pitch_rm, roll_rm;
+	  double y, p, ro;
+	  y = yaw * PI / 180.0;
+	  p = pitch * PI / 180.0;
+	  ro = roll * PI / 180.0;
+    Eigen::Quaternion<double> q = Eigen::AngleAxisd(ro, Eigen::Vector3d::UnitZ()) * Eigen::AngleAxisd(y, Eigen::Vector3d::UnitY()) * Eigen::AngleAxisd(p, Eigen::Vector3d::UnitX()); 
+
+    Matrix3d qm;
+    Matrix3frm rm;
+	  qm = q.matrix();
+	  rm = qm.cast<float>();
+	  rotation = rm.inverse() * rotation;
+	  printf("Yaw: %ld Pitch: %ld Roll: %ld\n", (long)yaw, (long)pitch, (long)roll);
+  
+	  // Translation based on optical flow from glasses
+	  double opx, opy, opz;
+	  opx = this->getGlassesX();
+	  opy = this->getGlassesY();
+	  opz = this->getGlassesZ();
+	  cv::Mat t3;
+	  t3 = (cv::Mat_<double>(3,1) << opx, opy, opz);
+	  Vector3f t4;
+	  cv2eigen(t3, t4);
+	  translation = rm.inverse() * translation + t4;
+	  printf("X: %f Y: %f Z: %f\n", opx, opy, opz);
+
+	}
 
   // Debug
+	/*
+	cout << "Rotation" << endl;
 	cout << rotation << endl;
+	cout << "Translation" << endl;
 	cout << translation << endl;
-	printf("Yaw: %ld Pitch: %ld Roll: %ld\n", (long)yaw, (long)pitch, (long)roll);
+	*/
 
 	this->setPoseR(rotation);
   this->setPoseT(translation);
 }
 
 void Reconstruction::run(boost::shared_ptr<openni_wrapper::Image>& rgbImage, boost::shared_ptr<openni_wrapper::DepthImage>& depthImage) {
-  printf("Running...\n");
   depthMap = image_->getDepthMap();
   depthDevice = image_->getDepthDevice();
   rgbDevice = image_->getRgbDevice();
@@ -327,6 +349,11 @@ void Reconstruction::getNormalVector(float *normalVector, bool globalCoordinates
       normalVector[point * 3 + 2] = inverse * normalsHost_[point].z;
   }
   
+}
+
+void Reconstruction::toggleGlasses() {
+  this->toggleYawPitchRollFromGlasses();
+	this->toggleXYZFromGlasses();
 }
 
 Reconstruction::~Reconstruction() {

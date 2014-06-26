@@ -12,16 +12,16 @@ CFLAGS		= -g -fpermissive -Wno-deprecated -w
 
 # libraries to link with:
 
-LIBPATH = -L/usr/include/pcl-1.6/ -L/usr/include/pcl-1.7/ -L/usr/include/eigen3 -L/usr/include/eigen3/Eigen -L/usr/include -L/usr/lib/nvidia-304 -L/usr/local/include
+LIBPATH = -L/usr/local/lib -L/usr/include/pcl-1.6/ -L/usr/include/pcl-1.7/ -L/usr/include/eigen3 -L/usr/include/eigen3/Eigen -L/usr/include -L/usr/lib/nvidia-304 -L/usr/local/include
 
 INCFLAGS = -I/usr/include/pcl-1.6/ -I/usr/include/pcl-1.7 -I/usr/include/eigen3 -I/usr/include/eigen3/Eigen -Iinclude -I. -I/usr/include/vtk-5.4 -I/usr/include/vtk-5.8 -I/usr/include/openni -I/usr/include/pcl-1.6/pcl/io -I/usr/include/pcl-1.7/pcl/io -Iinclude/HeadPoseEstimator -I/usr/local/include/opencv
 
 NVCCFLAGS = -arch=sm_11
 
 #LDFLAGS = -lpcl_search_release -lpcl_features_release -lpcl_kdtree_release -lopencv_core231 -lopencv_highgui231 -lopencv_imgproc231 -lopencv_objdetect231 -lpcl_common_release -lpcl_io_release -lpcl_io_ply_release -lvtkexpat -lvtkDICOMParser -lopenNI64 -lvtkjpeg -lvtkjpeg-gd -lvtktiff -lvtktiff-gd -lopengl32 -lvtkCharts -lvtkCharts-gd -lvtkalglib -lvtkalglib-gd -lvtkpng -lvtkpng-gd -lvtklibxml2 -lvtklibxml2-gd -lvtkIO -lvtkIO-gd -lvtkInfovis -lvtkInfovis-gd -lvtkzlib -lvtkzlib-gd -lvtkVolumeRendering -lvtkVolumeRendering-gd -lvtksys -lvtksys-gd -lvtkRendering -lvtkRendering-gd -lvtkGraphics -lvtkGraphics-gd -lvtkCommon -lvtkCommon-gd -lvtkFiltering -lvtkFiltering-gd -lcuda -lcudart -lboost_date_time-vc100-mt-1_47 -lboost_date_time-vc100-mt-gd-1_47 -lpcl_visualization_release -lpcl_gpu_containers -lGL -lGLU -lglut
-LDFLAGS = -lGL -lGLU -lglut -lcuda -lcufft -lopencv_imgproc -lpcl_search -lpcl_features -lpcl_kdtree -lpcl_common -lpcl_io -lpcl_io_ply -lpcl_visualization -lGLEW -lopencv_core -lopencv_flann -lopencv_highgui -lboost_thread -lboost_system -lOpenNI -lopencv_objdetect -lvtkCommon -lvtkFiltering -lvtkIO -lvtkRendering
+LDFLAGS = -lopencv_video -lopencv_calib3d -lGL -lGLU -lglut -lcuda -lcufft -lopencv_imgproc -lpcl_search -lpcl_features -lpcl_kdtree -lpcl_common -lpcl_io -lpcl_io_ply -lpcl_visualization -lGLEW -lopencv_core -lopencv_flann -lopencv_highgui -lboost_thread -lboost_system -lOpenNI -lopencv_objdetect -lvtkCommon -lvtkFiltering -lvtkIO -lvtkRendering -lopencv_flann
 
-OBJFILES = obj/device_memory.o obj/error.o obj/initialization.o obj/main.o obj/ColorVolume.o obj/FaceDetection.o obj/Image.o obj/MarchingCubes.o obj/Mesh.o obj/MyCVPointCloud.o obj/MyPointCloud.o obj/Reconstruction.o obj/TsdfVolume.o obj/HeadPoseEstimator/CRTree.o obj/HeadPoseEstimator/CRForestEstimator.o obj/HeadPoseEstimator/HeadPoseEstimator.o obj/cuda/colors.o obj/cuda/estimate_combined.o obj/cuda/extract.o obj/cuda/image_generator.o obj/cuda/maps.o obj/cuda/marching_cubes.o obj/cuda/normals_eigen.o obj/cuda/ray_caster.o obj/cuda/tsdf_volume.o obj/Viewers/MyGLImageViewer.o obj/Viewers/MyGLCloudViewer.o obj/Mediators/ColoredReconstructionMediator.o obj/Mediators/HeadPoseEstimationMediator.o obj/Mediators/MeshGenerationMediator.o obj/VolumetricData.o obj/Viewers/shader.o obj/Viewers/glm.o obj/cuda/bilateral_pyrdown.o
+OBJFILES = obj/device_memory.o obj/error.o obj/initialization.o obj/main.o obj/ColorVolume.o obj/FaceDetection.o obj/Image.o obj/MarchingCubes.o obj/Mesh.o obj/MyCVPointCloud.o obj/MyPointCloud.o obj/Reconstruction.o obj/Glasses.o obj/TsdfVolume.o obj/HeadPoseEstimator/CRTree.o obj/HeadPoseEstimator/CRForestEstimator.o obj/HeadPoseEstimator/HeadPoseEstimator.o obj/cuda/colors.o obj/cuda/estimate_combined.o obj/cuda/extract.o obj/cuda/image_generator.o obj/cuda/maps.o obj/cuda/marching_cubes.o obj/cuda/normals_eigen.o obj/cuda/ray_caster.o obj/cuda/tsdf_volume.o obj/Viewers/MyGLImageViewer.o obj/Viewers/MyGLCloudViewer.o obj/Mediators/ColoredReconstructionMediator.o obj/Mediators/HeadPoseEstimationMediator.o obj/Mediators/MeshGenerationMediator.o obj/VolumetricData.o obj/Viewers/shader.o obj/Viewers/glm.o obj/cuda/bilateral_pyrdown.o
 
 EXECFILES	= KinectFusion
 
@@ -76,6 +76,9 @@ obj/MyPointCloud.o:	src/MyPointCloud.cpp
 
 obj/Reconstruction.o:	src/Reconstruction.cpp
 	$(CXX) $(CFLAGS) -o obj/Reconstruction.o -c src/Reconstruction.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
+
+obj/Glasses.o: src/Glasses.cpp
+	$(CXX) $(CFLAGS) -o obj/Glasses.o -c src/Glasses.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)
 
 obj/TsdfVolume.o:	src/TsdfVolume.cpp
 	$(CXX) $(CFLAGS) -o obj/TsdfVolume.o -c src/TsdfVolume.cpp $(INCFLAGS) $(LIBPATH) $(LDFLAGS)

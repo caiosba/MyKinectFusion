@@ -1,76 +1,69 @@
+#ifndef GLASSES_H
+#define GLASSES_H
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <iostream>
+#include <ctype.h>
 
-#define SERVER_PORT 6001
+#include <opencv2/video/tracking.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 
-int sock;
+using namespace cv;
+using namespace std;
 
-struct glassesData {
+const int MAX_COUNT = 500;
+
+class Glasses
+{
+public:
+  Glasses(int port_number);
+	~Glasses();
+	void get();
+	void getYawPitchRoll();
+	void getXYZ();
+	void init();
+	void initYawPitchRoll();
+	void initXYZ();
+	void finish();
+	void finishYawPitchRoll();
+	void finishXYZ();
+	void zero();
+	void zeroXYZ();
+	void zeroYawPitchRoll();
+	long getYaw() { return yaw; }
+	long getPitch() { return pitch; }
+	long getRoll() { return roll; }
+	double getX() { return x; }
+	double getY() { return y; }
+	double getZ() { return z; }
+
+private:
+  int sock;
+	int port;
+  bool addRemovePt;
+  Mat gray;
+	Mat prevGray;
+	Mat image;
+	Mat homo;
+  vector<Point2f> points[2];
+  Point2f point;
+  VideoCapture cap;
   long yaw;
-	long pitch;
-	long roll;
+  long pitch;
+  long roll;
+  double x;
+  double y;
+  double z;
 };
 
-glassesData listenToUDP() {
-  char code;
-  char message[1024];
-  long yaw, pitch, roll;
-  int bytes;
-
-  bytes = read(sock, message, 1024);
-  glassesData data;
-
-  if (bytes > 0) {
-    message[bytes] = '\0';
-
-    sscanf(message, "%c %ld %ld %ld\n", &code, &yaw, &pitch, &roll);
-
-    // Data coming from the glasses
-    if (code == 'G') {
-			data.yaw = yaw;
-			data.pitch = pitch;
-			data.roll = roll;
-		}
-  }
-	
-	return data;
-}
-
-void initGlasses() {
-  struct sockaddr_in name;
-  struct hostent *hp, *gethostbyname();
-
-  printf("Listen activating.\n");
-
-  /* Create socket from which to read */
-  sock = socket(AF_INET, SOCK_DGRAM, 0);
-  if (sock < 0)   {
-    perror("Opening datagram socket\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  /* Bind our local address so that the client can send to us */
-  bzero((char *) &name, sizeof(name));
-  name.sin_family = AF_INET;
-  name.sin_addr.s_addr = htonl(INADDR_ANY);
-  name.sin_port = htons(SERVER_PORT);
-  
-  if (bind(sock, (struct sockaddr *) &name, sizeof(name))) {
-    perror("Binding datagram socket\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  printf("Socket has port number #%d\n", ntohs(name.sin_port));
-}
-
-void endGlasses() {
-  close(sock);
-}
+#endif

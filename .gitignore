@@ -3,7 +3,6 @@ KinectFusion
 *.pcd
 *.ply
 *.patch
-*.swp
-*.swo
+*.sw*
 *~
 *.yml*

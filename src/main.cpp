@@ -40,10 +40,12 @@ using namespace cv;
 
 int windowWidth = 1280;
 int windowHeight = 960;
+int socketPort = 6001;
 
 //Our Objects
 Kinect *kinect;
 Reconstruction *reconstruction;
+Glasses *glasses;
 MyGLImageViewer *myGLImageViewer;
 MyGLCloudViewer *myGLCloudViewer;
 VolumetricData *volumetricData;
@@ -574,6 +576,10 @@ void keyboard(unsigned char key, int x, int y)
 		std::cout << "Changing camera pose..." << std::endl;
     reconstruction->changePose();
 		break;
+	case (int)'g' : case (int)'G':
+		std::cout << "Toggling glasses" << std::endl;
+    reconstruction->toggleGlasses();
+		break;
 	case (int)'i' : case (int)'I':
 		std::cout << "Head Pose Tracking Activated..." << std::endl;
 		reconstruction->enableOnlyTracking();
@@ -823,15 +829,32 @@ void* pcl_viewer_thread(void* param) {
 }
 
 void* glasses_thread(void* param) {
-	glassesData data;
+  long yaw, pitch, roll;
+	double x, y, z;
 	while (true) {
     if (reconstruction->poseChanged()) {
-	    data = listenToUDP();
-			reconstruction->setGlassesYaw(data.yaw);
-			reconstruction->setGlassesPitch(data.pitch);
-			reconstruction->setGlassesRoll(data.roll);
-		  usleep(100000);
+
+			// Get yaw, pitch, roll data from socket
+			// and x, y, z from optical flow
+			
+			glasses->get();
+			
+			yaw = glasses->getYaw();
+			pitch = glasses->getPitch();
+			roll = glasses->getRoll();
+			x = glasses->getX();
+			y = glasses->getY();
+			z = glasses->getZ();
+
+			reconstruction->setGlassesYaw(yaw);
+			reconstruction->setGlassesPitch(pitch);
+			reconstruction->setGlassesRoll(roll);
+			reconstruction->setGlassesX(x);
+			reconstruction->setGlassesY(y);
+			reconstruction->setGlassesZ(z);
 		}
+		// Don't maximize CPU time
+		usleep(100000);
 	}
 }
 
@@ -917,9 +940,12 @@ int main(int argc, char **argv) {
   // Cloud AR
   // pthread_t thread_id2;
   // pthread_create(&thread_id2, NULL, pcl_viewer_thread_virtual_object, (void *)&reconstruction);
-  initGlasses();
-  pthread_t thread_glasses;
-  pthread_create(&thread_glasses, NULL, glasses_thread, (void *)&reconstruction);
+
+	// Glasses integration
+	glasses = new Glasses(socketPort);
+  glasses->init();
+	pthread_t thread_glasses;
+  pthread_create(&thread_glasses, NULL, glasses_thread, (void *)&glasses);
 
 	//Initialize the GL window
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_ALPHA);
@@ -967,13 +993,13 @@ int main(int argc, char **argv) {
   delete myGLImageViewer;
   delete myGLCloudViewer;
   delete volumetricData;
+	delete glasses;
   if(integrateColors)
 	  delete coloredReconstructionMediator;
   if(isHeadPoseEstimationEnabled)
 	  delete headPoseEstimationMediator;
   if(hasFaceDetection)
 	  delete faceDetector;
-	endGlasses();
   return 0;
 
 }

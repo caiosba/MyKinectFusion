@@ -103,6 +103,18 @@ public:
 	void setGlassesPitch(long p) { glasses_pitch_ = p; }
 	long getGlassesRoll() { return glasses_roll_; }
 	void setGlassesRoll(long r) { glasses_roll_ = r; }
+	double getGlassesX() { return glasses_x_; }
+	void setGlassesX(double x) { glasses_x_ = x; }
+	double getGlassesY() { return glasses_y_; }
+	void setGlassesY(double y) { glasses_y_ = y; }
+	double getGlassesZ() { return glasses_z_; }
+	void setGlassesZ(double z) { glasses_z_ = z; }
+	void toggleYawPitchRollFromGlasses() { enableYawPitchRollFromGlasses = !enableYawPitchRollFromGlasses; }
+	void toggleXYZFromGlasses() { enableXYZFromGlasses = !enableXYZFromGlasses; }
+	void toggleGlasses();
+	bool useYawPitchRollFromGlasses() { return enableYawPitchRollFromGlasses; }
+	bool useXYZFromGlasses() { return enableXYZFromGlasses; }
+	bool useGlasses() { return (enableYawPitchRollFromGlasses && enableXYZFromGlasses); }
 	
 private:
 
@@ -124,7 +136,7 @@ private:
 	bool hasIncrement_;
 	bool isOnlyTrackingOn_;
 	bool stopTracking_;
-        bool changePose_;
+  bool changePose_;
 
 	int threshold_;
 
@@ -161,6 +173,12 @@ private:
 	long glasses_yaw_;
 	long glasses_pitch_;
 	long glasses_roll_;
+	double glasses_x_;
+	double glasses_y_;
+	double glasses_z_;
+	bool enableYawPitchRollFromGlasses;
+	bool enableXYZFromGlasses;
+	bool enableGlasses;
 };
 
 #endif
