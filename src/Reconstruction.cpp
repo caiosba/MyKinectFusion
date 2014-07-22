@@ -33,6 +33,8 @@ Reconstruction::Reconstruction(Eigen::Vector3i& volumeSize) {
 	enableXYZFromGlasses = true;
 	enableGlasses = true;
 
+	enableCalibrationFile = true;
+
   float f = 525.f;
   image_->setDepthIntrinsics(f, f);
   image_->setTrancationDistance(tsdfVolume_->getVolumeSize());
@@ -112,27 +114,31 @@ void Reconstruction::reset() {
 }
 
 void Reconstruction::readPoseFromFile() {
-  // return;
-  cout << "Using transformation from file" << endl;
+
   Matrix3frm rcurr = this->getCurrentRotation();
 	Vector3f tcurr = this->getCurrentTranslation();
   Matrix3frm ri = this->getRotationMatrices()[0];
 	Vector3f ti = this->getTranslationVectors()[0];
 
-  cv::FileStorage fs;
-  fs.open("mystereocalib.yml", cv::FileStorage::READ);
-	cv::Mat r, t;
-	Matrix3frm r2;
-	Vector3f t2;
-	fs["R"] >> r;
-	fs["T"] >> t;
-	cv2eigen(r, r2);
-	cv2eigen(t, t2);
-	fs.release();
+	Matrix3frm rotation = rcurr;
+	Vector3f translation = tcurr;
 
   // Transform based on calibration file
-	Matrix3frm rotation = r2.inverse() * rcurr;
-	Vector3f translation = r2.inverse() * tcurr + t2;
+  if (this->useFile()) {
+    cv::FileStorage fs;
+    fs.open("calibration.yml", cv::FileStorage::READ);
+	  cv::Mat r, t;
+	  Matrix3frm r2;
+	  Vector3f t2;
+	  fs["R"] >> r;
+	  fs["T"] >> t;
+	  cv2eigen(r, r2);
+	  cv2eigen(t, t2);
+	  fs.release();
+
+	  Matrix3frm rotation = r2.inverse() * rcurr;
+	  Vector3f translation = r2.inverse() * tcurr + t2;
+	}
 
   // Transformation based on glasses
 	if (this->useGlasses()) {
@@ -166,7 +172,6 @@ void Reconstruction::readPoseFromFile() {
 	  cv2eigen(t3, t4);
 	  translation = rm.inverse() * translation + t4;
 	  printf("X: %f Y: %f Z: %f\n", opx, opy, opz);
-
 	}
 
   // Debug

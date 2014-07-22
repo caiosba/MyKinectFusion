@@ -115,6 +115,7 @@ public:
 	bool useYawPitchRollFromGlasses() { return enableYawPitchRollFromGlasses; }
 	bool useXYZFromGlasses() { return enableXYZFromGlasses; }
 	bool useGlasses() { return (enableYawPitchRollFromGlasses && enableXYZFromGlasses); }
+	bool useFile() { return enableCalibrationFile; }
 	
 private:
 
@@ -179,6 +180,7 @@ private:
 	bool enableYawPitchRollFromGlasses;
 	bool enableXYZFromGlasses;
 	bool enableGlasses;
+	bool enableCalibrationFile;
 };
 
 #endif
