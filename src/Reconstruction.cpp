@@ -136,8 +136,8 @@ void Reconstruction::readPoseFromFile() {
 	  cv2eigen(t, t2);
 	  fs.release();
 
-	  Matrix3frm rotation = r2.inverse() * rcurr;
-	  Vector3f translation = r2.inverse() * tcurr + t2;
+	  rotation = rcurr * r2.inverse();
+	  translation = r2.inverse() * tcurr + t2;
 	}
 
   // Transformation based on glasses
