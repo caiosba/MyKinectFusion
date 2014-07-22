@@ -118,7 +118,7 @@ void Glasses::getXYZ() {
     addRemovePt = false;
   }
  
-  // imshow("Optical Flow", image);
+  imshow("Optical Flow", image);
 
   std::swap(points[1], points[0]);
   cv::swap(prevGray, gray);
