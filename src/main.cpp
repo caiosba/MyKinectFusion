@@ -84,13 +84,9 @@ int indices[640 * 480 * 6];
 float pointCloud[640 * 480 * 3];
 float normalVector[640 * 480 * 3];
 
-/*
-(Deprecated) Compatibility to the non-use of Kinect. In future, these variables will be related 
-to ONIFiles
-*/
-char *fileName;
-int beginF = 0;
-int endF = 0;
+// Use a stream from an .ONI file instead of using live stream from Kinect (default)
+bool live = false;
+char *onifile = "stream.oni";
 
 //AR (General attributes)
 int vel = 8;
@@ -915,8 +911,10 @@ void* pcl_viewer_thread_virtual_object(void* param) {
 
 int main(int argc, char **argv) {
 
-  pcl::gpu::setDevice (0);
-  pcl::gpu::printShortCudaDeviceInfo (0);
+  if (live) {
+    pcl::gpu::setDevice(0);
+    pcl::gpu::printShortCudaDeviceInfo(0);
+	}
   
   //This argument is an exception. It is loaded first because it is necessary to instantiate the Reconstruction object
   Eigen::Vector3i volumeSize(3000, 3000, 3000); //mm
@@ -927,7 +925,7 @@ int main(int argc, char **argv) {
   {
 	//Initialize the Reconstruction object
 	reconstruction = new Reconstruction(volumeSize);
-	kinect = new Kinect();
+	kinect = new Kinect(live, onifile);
 	loadArguments(argc, argv, reconstruction);
   
   // Initialize a thread for cloud visualization, which needs access to the cloud

@@ -2,11 +2,12 @@
 #define KINECT_H
 
 #include <pcl/io/openni_grabber.h>
+#include <pcl/io/oni_grabber.h>
 
 class Kinect
 {
 public:
-	Kinect();
+	Kinect(bool live, char *onifile);
 	~Kinect();
 	bool grabFrame();
 	boost::shared_ptr<openni_wrapper::Image>& getRGBImage() { return rgbImage; }
