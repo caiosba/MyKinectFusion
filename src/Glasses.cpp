@@ -5,56 +5,70 @@
 
 Glasses::Glasses(int port_number) {
   addRemovePt = false;
+	useSimulatedData = true;
 	port = port_number;
 }
 
 void Glasses::getYawPitchRoll() {
   char code;
-  char message[1024];
   long y, p, r;
-  int bytes;
 
-  bytes = read(sock, message, 1024);
+  // Read from file
+	if (useSimulatedData && !simulation.eof()) {
+    char *message;
+	  string line;
+    std::getline(simulation, line);
+		message = line.c_str();
+    sscanf(message, "%c %ld %ld %ld\n", &code, &y, &p, &r);
+	}
 
-  if (bytes > 0) {
-    message[bytes] = '\0';
+	// Read from socket
+	else {
+	  char message[1024];
+    int bytes = read(sock, message, 1024);
+
+    if (bytes > 0) {
+      message[bytes] = '\0';
+	  }
 
     sscanf(message, "%c %ld %ld %ld\n", &code, &y, &p, &r);
+  }
 
-    // Data coming from the glasses
-    if (code == 'G') {
-      yaw = y;
-      pitch = p;
-      roll = r;
-    }
+  if (code == 'G') {
+    yaw = y;
+    pitch = p;
+    roll = r;
   }
 }
 
 void Glasses::initYawPitchRoll() {
-  struct sockaddr_in name;
-  struct hostent *hp, *gethostbyname();
+	// Open socket
+	if (!useSimulatedData) {
+    struct sockaddr_in name;
+    struct hostent *hp, *gethostbyname();
 
-  printf("Listen activating.\n");
+    printf("Listen activating.\n");
 
-  /* Create socket from which to read */
-  sock = socket(AF_INET, SOCK_DGRAM, 0);
-  if (sock < 0)   {
-    perror("Opening datagram socket\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  /* Bind our local address so that the client can send to us */
-  bzero((char *) &name, sizeof(name));
-  name.sin_family = AF_INET;
-  name.sin_addr.s_addr = htonl(INADDR_ANY);
-  name.sin_port = htons(port);
-  
-  if (bind(sock, (struct sockaddr *) &name, sizeof(name))) {
-    perror("Binding datagram socket\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  printf("Socket has port number #%d\n", ntohs(name.sin_port));
+    /* Create socket from which to read */
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0)   {
+      perror("Opening datagram socket\n");
+      exit(EXIT_FAILURE);
+    }
+    
+    /* Bind our local address so that the client can send to us */
+    bzero((char *) &name, sizeof(name));
+    name.sin_family = AF_INET;
+    name.sin_addr.s_addr = htonl(INADDR_ANY);
+    name.sin_port = htons(port);
+    
+    if (bind(sock, (struct sockaddr *) &name, sizeof(name))) {
+      perror("Binding datagram socket\n");
+      exit(EXIT_FAILURE);
+    }
+    
+    printf("Socket has port number #%d\n", ntohs(name.sin_port));
+	}
 }
 
 void Glasses::getXYZ() {
@@ -118,14 +132,21 @@ void Glasses::getXYZ() {
     addRemovePt = false;
   }
  
-  imshow("Optical Flow", image);
+  // imshow("Optical Flow", image);
 
   std::swap(points[1], points[0]);
   cv::swap(prevGray, gray);
 }
 
 void Glasses::finishYawPitchRoll() {
-  close(sock);
+	if (useSimulatedData) {
+	  if (simulation.is_open()) {
+	    simulation.close();
+	  }
+	}
+	else {
+    close(sock);
+	}
 }
 
 void Glasses::initXYZ() {

@@ -10,6 +10,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fstream>
 #include <iostream>
 #include <ctype.h>
 
@@ -22,6 +23,10 @@ using namespace cv;
 using namespace std;
 
 const int MAX_COUNT = 500;
+
+// I know that is ugly that this is a global variable, I tried to use it as a class member
+// but I was getting some strange malloc errors
+ifstream simulation("glasses.out");
 
 class Glasses
 {
@@ -51,6 +56,7 @@ private:
   int sock;
 	int port;
   bool addRemovePt;
+	bool useSimulatedData;
   Mat gray;
 	Mat prevGray;
 	Mat image;
