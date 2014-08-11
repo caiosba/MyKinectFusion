@@ -24,10 +24,6 @@ using namespace std;
 
 const int MAX_COUNT = 500;
 
-// I know that is ugly that this is a global variable, I tried to use it as a class member
-// but I was getting some strange malloc errors
-ifstream simulation("glasses.out");
-
 class Glasses
 {
 public:
@@ -51,6 +47,7 @@ public:
 	double getX() { return x; }
 	double getY() { return y; }
 	double getZ() { return z; }
+	Mat getFrame() { return frame; }
 
 private:
   int sock;
@@ -61,6 +58,7 @@ private:
 	Mat prevGray;
 	Mat image;
 	Mat homo;
+	Mat frame;
   vector<Point2f> points[2];
   Point2f point;
   VideoCapture cap;

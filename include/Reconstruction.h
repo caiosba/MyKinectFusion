@@ -116,6 +116,9 @@ public:
 	bool useXYZFromGlasses() { return enableXYZFromGlasses; }
 	bool useGlasses() { return (enableYawPitchRollFromGlasses && enableXYZFromGlasses); }
 	bool useFile() { return enableCalibrationFile; }
+	bool getEnableGlassesBackground() { return enableGlassesBackground; }
+	void setGlassesFrame(cv::Mat frame) { glasses_frame_ = frame; }
+	cv::Mat getGlassesFrame() { return glasses_frame_; }
 	
 private:
 
@@ -181,6 +184,8 @@ private:
 	bool enableXYZFromGlasses;
 	bool enableGlasses;
 	bool enableCalibrationFile;
+	bool enableGlassesBackground;
+	cv::Mat glasses_frame_;
 };
 
 #endif

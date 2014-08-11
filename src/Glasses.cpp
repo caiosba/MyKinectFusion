@@ -3,9 +3,13 @@
 #define _CRT_SECURE_NO_DEPRECATE
 #define NOMINMAX
 
+// I know that is ugly that this is a global variable, I tried to use it as a class member
+// but I was getting some strange malloc errors
+std::ifstream glassesInput("glasses.out");
+
 Glasses::Glasses(int port_number) {
   addRemovePt = false;
-	useSimulatedData = true;
+	useSimulatedData = false;
 	port = port_number;
 }
 
@@ -14,10 +18,10 @@ void Glasses::getYawPitchRoll() {
   long y, p, r;
 
   // Read from file
-	if (useSimulatedData && !simulation.eof()) {
+	if (useSimulatedData && !glassesInput.eof()) {
     char *message;
 	  string line;
-    std::getline(simulation, line);
+    std::getline(glassesInput, line);
 		message = line.c_str();
     sscanf(message, "%c %ld %ld %ld\n", &code, &y, &p, &r);
 	}
@@ -75,7 +79,6 @@ void Glasses::getXYZ() {
   Size subPixWinSize(10,10);
 	Size winSize(31,31);
   TermCriteria termcrit(TermCriteria::COUNT|TermCriteria::EPS, 20, 0.03);
-  Mat frame;
   cap >> frame;
   if (frame.empty()) return;
   frame.copyTo(image);
@@ -140,8 +143,8 @@ void Glasses::getXYZ() {
 
 void Glasses::finishYawPitchRoll() {
 	if (useSimulatedData) {
-	  if (simulation.is_open()) {
-	    simulation.close();
+	  if (glassesInput.is_open()) {
+	    glassesInput.close();
 	  }
 	}
 	else {
@@ -152,7 +155,13 @@ void Glasses::finishYawPitchRoll() {
 void Glasses::initXYZ() {
   Size subPixWinSize(10,10);
   TermCriteria termcrit(TermCriteria::COUNT|TermCriteria::EPS, 20, 0.03);
-  cap.open(1);
+
+  if (useSimulatedData) {
+	  cap.open("glasses1.avi");
+	}
+	else {
+    cap.open(1);
+	}
 
   if (!cap.isOpened())
   {
@@ -160,7 +169,6 @@ void Glasses::initXYZ() {
   }
   else {
     // Automatic Initialization
-    Mat frame;
     cap >> frame;
     if (frame.empty()) return;
     frame.copyTo(image);

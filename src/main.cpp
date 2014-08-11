@@ -85,7 +85,7 @@ float pointCloud[640 * 480 * 3];
 float normalVector[640 * 480 * 3];
 
 // Use a stream from an .ONI file instead of using live stream from Kinect (default)
-bool live = false;
+bool live = true;
 char *onifile = "stream.oni";
 
 //AR (General attributes)
@@ -195,9 +195,9 @@ void positionVirtualObject(int x, int y)
 {
 	//We compute the translationVector necessary to move the virtual object
 	float virtualCentroid[3];
-	if(ARPolygonal)
+	if (ARPolygonal)
 		myGLCloudViewer->computeARModelCentroid(virtualCentroid);
-	if(ARVolumetric) {
+	if (ARVolumetric) {
 		virtualCentroid[0] = 0.5f; virtualCentroid[1] = 0.5f; virtualCentroid[2] = 0.5f;
 	}
 
@@ -213,7 +213,8 @@ void positionVirtualObject(int x, int y)
 	float cy = reconstruction->getIntrinsics().cy;
 	float fx = reconstruction->getIntrinsics().fx;
 	float fy = reconstruction->getIntrinsics().fy;
-	//If the chosen point is visible
+	
+	// If the chosen point is visible
 	if(reconstruction->getCurrentDepthMap()[pixel] != 0) {
 	
 		float xp = (float)(x - cx) * reconstruction->getCurrentDepthMap()[pixel]/fx;
@@ -339,23 +340,24 @@ void displayRaycastedData()
 	glMatrixMode(GL_PROJECTION);          
 	glLoadIdentity();
   if (reconstruction->poseChanged()) {
-    // Mat bg;
-    // VideoCapture cap = VideoCapture(1); // Change ID in order to change camera
-    // cap >> bg;
-    // cvtColor(bg, bg, CV_BGR2RGB);
-		// Mat image = Mat(480, 640, CV_8UC3, reconstruction->getRaycastImageFromPose());
-		// for (int i=0; i < image.rows; i++) {
-		// 	for (int j=0; j < image.cols; j++) {
-		// 	  // FIXME: This is slow, replace by faster method
-		// 		if (image.at<cv::Vec3b>(i,j)[0] == 0 && image.at<cv::Vec3b>(i,j)[1] == 0 && image.at<cv::Vec3b>(i,j)[2] == 0) {
-		// 	    image.at<cv::Vec3b>(i,j)[0] = bg.at<cv::Vec3b>(i,j)[0];
-		// 	    image.at<cv::Vec3b>(i,j)[1] = bg.at<cv::Vec3b>(i,j)[1];
-		// 	    image.at<cv::Vec3b>(i,j)[2] = bg.at<cv::Vec3b>(i,j)[2];
-		// 		}
-    //   }
-		// }
-		// myGLImageViewer->loadRGBTexture((const unsigned char*)image.data, texVBO, RAYCAST_BO, windowWidth, windowHeight);
-	  myGLImageViewer->loadRGBTexture(reconstruction->getRaycastImageFromPose(), texVBO, RAYCAST_BO, windowWidth, windowHeight);
+	  if (reconstruction->getEnableGlassesBackground()) {
+      Mat bg = reconstruction->getGlassesFrame();
+      cvtColor(bg, bg, CV_BGR2RGB);
+		  Mat image = Mat(480, 640, CV_8UC3, reconstruction->getRaycastImageFromPose());
+		  for (int i=0; i < image.rows; i++) {
+		  	for (int j=0; j < image.cols; j++) {
+		  		if (image.at<cv::Vec3b>(i,j)[0] == 0 && image.at<cv::Vec3b>(i,j)[1] == 0 && image.at<cv::Vec3b>(i,j)[2] == 0) {
+		  	    image.at<cv::Vec3b>(i,j)[0] = bg.at<cv::Vec3b>(i,j)[0];
+		  	    image.at<cv::Vec3b>(i,j)[1] = bg.at<cv::Vec3b>(i,j)[1];
+		  	    image.at<cv::Vec3b>(i,j)[2] = bg.at<cv::Vec3b>(i,j)[2];
+		  		}
+        }
+		  }
+		  myGLImageViewer->loadRGBTexture((const unsigned char*)image.data, texVBO, RAYCAST_BO, windowWidth, windowHeight);
+		}
+		else {
+	    myGLImageViewer->loadRGBTexture(reconstruction->getRaycastImageFromPose(), texVBO, RAYCAST_BO, windowWidth, windowHeight);
+		}
   }
   else {
 	  myGLImageViewer->loadRGBTexture(reconstruction->getRaycastImage(), texVBO, RAYCAST_BO, windowWidth, windowHeight);
@@ -827,6 +829,7 @@ void* pcl_viewer_thread(void* param) {
 void* glasses_thread(void* param) {
   long yaw, pitch, roll;
 	double x, y, z;
+	Mat frame;
 	while (true) {
     if (reconstruction->poseChanged()) {
 
@@ -841,6 +844,7 @@ void* glasses_thread(void* param) {
 			x = glasses->getX();
 			y = glasses->getY();
 			z = glasses->getZ();
+			frame = glasses->getFrame();
 
 			reconstruction->setGlassesYaw(yaw);
 			reconstruction->setGlassesPitch(pitch);
@@ -848,6 +852,7 @@ void* glasses_thread(void* param) {
 			reconstruction->setGlassesX(x);
 			reconstruction->setGlassesY(y);
 			reconstruction->setGlassesZ(z);
+			reconstruction->setGlassesFrame(frame);
 		}
 		// Don't maximize CPU time
 		usleep(100000);

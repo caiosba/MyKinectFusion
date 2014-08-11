@@ -7,4 +7,5 @@ KinectFusion
 *~
 *.yml*
 *.oni
-glasses.out
+*.out
+*.avi

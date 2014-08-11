@@ -32,6 +32,7 @@ Reconstruction::Reconstruction(Eigen::Vector3i& volumeSize) {
 	enableYawPitchRollFromGlasses = true;
 	enableXYZFromGlasses = true;
 	enableGlasses = true;
+	enableGlassesBackground = true;
 
 	enableCalibrationFile = true;
 
@@ -40,9 +41,9 @@ Reconstruction::Reconstruction(Eigen::Vector3i& volumeSize) {
   image_->setTrancationDistance(tsdfVolume_->getVolumeSize());
 
   init_Rcam_ = Eigen::Matrix3f::Identity(); // * AngleAxisf(-180.f/180*3.1415926, Vector3f::UnitY());
-        // init_tcam_ = Eigen::Vector3f::Zero();
+  // init_tcam_ = Eigen::Vector3f::Zero();
   // init_tcam_ = { 1500, 1500, -300 };
-        // The values above are the results from the expression below... the volume is a 3000-wide cube
+  // The values above are the results from the expression below... the volume is a 3000-wide cube
   init_tcam_ = tsdfVolume_->getVolumeSize() * 0.5f - Vector3f (0, 0, tsdfVolume_->getVolumeSize() (2) / 2 * 1.2f);
   
   rmats_.reserve (30000);
