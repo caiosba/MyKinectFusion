@@ -80,6 +80,11 @@ boost::shared_ptr<openni_wrapper::DepthImage> Kinect::removeBackground(const boo
 		depthMap[pixel] = static_cast<XnDepthPixel>(depthData[pixel]);
 	}
 	boost::shared_ptr<openni_wrapper::DepthImage> depthImageNew (new openni_wrapper::DepthImage(depthMetaData, 0.075f, 525.f, 0, 0));
-
+	
+	// Free memory
+	cvReleaseImage(&rgbData);
+	cvReleaseImage(&grayImage);
+	cvReleaseImage(&bwImage);
+	
 	return depthImageNew;
 }
