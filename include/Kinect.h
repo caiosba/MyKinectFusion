@@ -3,6 +3,8 @@
 
 #include <pcl/io/openni_grabber.h>
 #include <pcl/io/oni_grabber.h>
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
 
 class Kinect
 {
@@ -12,6 +14,7 @@ public:
 	bool grabFrame();
 	boost::shared_ptr<openni_wrapper::Image>& getRGBImage() { return rgbImage; }
 	boost::shared_ptr<openni_wrapper::DepthImage>& getDepthImage() { return depthImage; }
+  boost::shared_ptr<openni_wrapper::DepthImage> removeBackground(const boost::shared_ptr<openni_wrapper::DepthImage>& depthImage, const boost::shared_ptr<openni_wrapper::Image>& rgbImage);
 private:
 	void imageCallBack (const boost::shared_ptr<openni_wrapper::Image>& rgbImage, const boost::shared_ptr<openni_wrapper::DepthImage>& depthImage, float constant);
 	

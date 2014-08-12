@@ -934,7 +934,7 @@ int main(int argc, char **argv) {
 	loadArguments(argc, argv, reconstruction);
   
   // Initialize a thread for cloud visualization, which needs access to the cloud
-	// Uncomment here and comment line 193 on src/Reconstruction.cpp in order to enable independent camera
+	// Uncomment here and comment line 239 on src/Reconstruction.cpp in order to enable independent camera instead of pose from file
 	/*
   pthread_t thread_id;
   pthread_create(&thread_id, NULL, pcl_viewer_thread, (void *)&reconstruction);

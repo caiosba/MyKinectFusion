@@ -206,7 +206,7 @@ void Reconstruction::run(boost::shared_ptr<openni_wrapper::Image>& rgbImage, boo
 
   sourceRgbData.resize(rgbMap.cols * rgbMap.rows);
   rgbImage->fillRGB(rgbMap.cols, rgbMap.rows, (unsigned char*)&sourceRgbData[0]);
-  rgbMap.data = &sourceRgbData[0];
+	rgbMap.data = &sourceRgbData[0];
   
   rgbDevice.upload(rgbMap.data, rgbMap.step, rgbMap.rows, rgbMap.cols);
   depthDevice.upload(depthMap.data, depthMap.step, depthMap.rows, depthMap.cols);
@@ -235,7 +235,6 @@ void Reconstruction::run(boost::shared_ptr<openni_wrapper::Image>& rgbImage, boo
       if (!hasImage_) reset();
       else {
         tsdfVolume_->integrateVolume(rmats_, tvecs_, depthDevice, image_->getIntrinsics(), image_->getTrancationDistance(), image_->getDepthRawScaled(), globalTime);
-        // if (changePose_) this->transformCamera(rmats_, tvecs_, globalTime);
         if (changePose_) {
           this->readPoseFromFile();
           tsdfVolume_->raycastFromPose(rmats_, tvecs_, image_->getIntrinsics(), image_->getTrancationDistance(), globalPreviousPointCloud_, globalTime, pose_rmats_, pose_tvecs_);
