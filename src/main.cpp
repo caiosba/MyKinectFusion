@@ -342,18 +342,20 @@ void displayRaycastedData()
   if (reconstruction->poseChanged()) {
 	  if (reconstruction->getEnableGlassesBackground()) {
       Mat bg = reconstruction->getGlassesFrame();
-      cvtColor(bg, bg, CV_BGR2RGB);
 		  Mat image = Mat(480, 640, CV_8UC3, reconstruction->getRaycastImageFromPose());
-		  for (int i=0; i < image.rows; i++) {
-		  	for (int j=0; j < image.cols; j++) {
-		  		if (image.at<cv::Vec3b>(i,j)[0] == 0 && image.at<cv::Vec3b>(i,j)[1] == 0 && image.at<cv::Vec3b>(i,j)[2] == 0) {
-		  	    image.at<cv::Vec3b>(i,j)[0] = bg.at<cv::Vec3b>(i,j)[0];
-		  	    image.at<cv::Vec3b>(i,j)[1] = bg.at<cv::Vec3b>(i,j)[1];
-		  	    image.at<cv::Vec3b>(i,j)[2] = bg.at<cv::Vec3b>(i,j)[2];
-		  		}
-        }
-		  }
-		  myGLImageViewer->loadRGBTexture((const unsigned char*)image.data, texVBO, RAYCAST_BO, windowWidth, windowHeight);
+			if (bg.data && image.data) {
+        cvtColor(bg, bg, CV_BGR2RGB);
+		    for (int i=0; i < image.rows; i++) {
+		    	for (int j=0; j < image.cols; j++) {
+		    		if (image.at<cv::Vec3b>(i,j)[0] == 0 && image.at<cv::Vec3b>(i,j)[1] == 0 && image.at<cv::Vec3b>(i,j)[2] == 0) {
+		    	    image.at<cv::Vec3b>(i,j)[0] = bg.at<cv::Vec3b>(i,j)[0];
+		    	    image.at<cv::Vec3b>(i,j)[1] = bg.at<cv::Vec3b>(i,j)[1];
+		    	    image.at<cv::Vec3b>(i,j)[2] = bg.at<cv::Vec3b>(i,j)[2];
+		    		}
+          }
+		    }
+		    myGLImageViewer->loadRGBTexture((const unsigned char*)image.data, texVBO, RAYCAST_BO, windowWidth, windowHeight);
+			}
 		}
 		else {
 	    myGLImageViewer->loadRGBTexture(reconstruction->getRaycastImageFromPose(), texVBO, RAYCAST_BO, windowWidth, windowHeight);

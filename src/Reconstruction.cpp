@@ -137,8 +137,12 @@ void Reconstruction::readPoseFromFile() {
 	  cv2eigen(t, t2);
 	  fs.release();
 
+		//FIXME: t3 should not be necessary?
+		Vector3f t3;
+		t3 = { 40, 100, 540 };
+
 	  rotation = rcurr * r2.inverse();
-	  translation = r2.inverse() * tcurr + t2;
+	  translation = r2.inverse() * tcurr + t2 + t3;
 	}
 
   // Transformation based on glasses
