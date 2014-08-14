@@ -139,7 +139,7 @@ void Reconstruction::readPoseFromFile() {
 
 		//FIXME: t3 should not be necessary?
 		Vector3f t3;
-		t3 = { 40, 100, 540 };
+		t3 = { 50, 90, 550 };
 
 	  rotation = rcurr * r2.inverse();
 	  translation = r2.inverse() * tcurr + t2 + t3;
@@ -154,16 +154,21 @@ void Reconstruction::readPoseFromFile() {
 	  long roll = this->getGlassesRoll();
 	  Matrix3frm yaw_rm, pitch_rm, roll_rm;
 	  double y, p, ro;
-	  y = yaw * PI / 180.0;
-	  p = pitch * PI / 180.0;
-	  ro = roll * PI / 180.0;
+	  y = -yaw * PI / 180.0;
+	  p = -pitch * PI / 180.0;
+	  ro = -roll * PI / 180.0;
     Eigen::Quaternion<double> q = Eigen::AngleAxisd(ro, Eigen::Vector3d::UnitZ()) * Eigen::AngleAxisd(y, Eigen::Vector3d::UnitY()) * Eigen::AngleAxisd(p, Eigen::Vector3d::UnitX()); 
 
     Matrix3d qm;
     Matrix3frm rm;
 	  qm = q.matrix();
 	  rm = qm.cast<float>();
-	  rotation = rm.inverse() * rotation;
+    /*
+		rm << cos(y), -sin(y), 0,
+		      sin(y),  cos(y), 0,
+					0,       0,      1;
+    */
+	  rotation = rm * rotation;
 	  printf("Yaw: %ld Pitch: %ld Roll: %ld\n", (long)yaw, (long)pitch, (long)roll);
   
 	  // Translation based on optical flow from glasses
@@ -172,11 +177,11 @@ void Reconstruction::readPoseFromFile() {
 	  opy = this->getGlassesY();
 	  opz = this->getGlassesZ();
 	  cv::Mat t3;
-	  t3 = (cv::Mat_<double>(3,1) << opx, opy, opz);
+	  t3 = (cv::Mat_<int>(3,1) << (int)opx, (int)opy, (int)opz);
 	  Vector3f t4;
 	  cv2eigen(t3, t4);
-	  translation = rm.inverse() * translation + t4;
-	  printf("X: %f Y: %f Z: %f\n", opx, opy, opz);
+	  translation = rm * translation - t4;
+	  printf("X: %d Y: %d Z: %d\n", (int)opx, (int)opy, (int)opz);
 	}
 
   // Debug

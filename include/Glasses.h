@@ -44,8 +44,8 @@ public:
 	long getYaw() { return yaw; }
 	long getPitch() { return pitch; }
 	long getRoll() { return roll; }
-	double getX() { return x; }
-	double getY() { return y; }
+	double getX() { return x - xi; }
+	double getY() { return y - yi; }
 	double getZ() { return z; }
 	Mat getFrame() { return frame; }
 
@@ -68,6 +68,9 @@ private:
   double x;
   double y;
   double z;
+	double xi;
+	double yi;
+	bool initialized;
 };
 
 #endif

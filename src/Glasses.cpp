@@ -76,6 +76,7 @@ void Glasses::initYawPitchRoll() {
 }
 
 void Glasses::getXYZ() {
+  // Automatic Initialization
   Size subPixWinSize(10,10);
 	Size winSize(31,31);
   TermCriteria termcrit(TermCriteria::COUNT|TermCriteria::EPS, 20, 0.03);
@@ -93,8 +94,15 @@ void Glasses::getXYZ() {
     Mat homo;
     try {
       homo = findHomography(points[0], points[1], CV_RANSAC, 3);
-      x = homo.at<double>(0,2);
-      y = homo.at<double>(1,2);
+      x += homo.at<double>(0,2);
+      y += homo.at<double>(1,2);
+			if (yaw == 0 && pitch == 0 && roll == 0 && !initialized) {
+			  xi = x;
+			  yi = y;
+			}
+			else {
+			  initialized = true;
+			}
       z = homo.at<double>(2,2);
     }
     catch (Exception &e) {
@@ -120,11 +128,6 @@ void Glasses::getXYZ() {
     }
     points[1].resize(k);
   }
-  else {
-    goodFeaturesToTrack(gray, points[1], MAX_COUNT, 0.01, 10, Mat(), 3, 0, 0.04);
-    cornerSubPix(gray, points[1], subPixWinSize, Size(-1,-1), termcrit);
-    addRemovePt = false;
-  }
 
   if (addRemovePt && points[1].size() < (size_t)MAX_COUNT)
   {
@@ -135,8 +138,6 @@ void Glasses::getXYZ() {
     addRemovePt = false;
   }
  
-  // imshow("Optical Flow", image);
-
   std::swap(points[1], points[0]);
   cv::swap(prevGray, gray);
 }
@@ -155,6 +156,10 @@ void Glasses::finishYawPitchRoll() {
 void Glasses::initXYZ() {
   Size subPixWinSize(10,10);
   TermCriteria termcrit(TermCriteria::COUNT|TermCriteria::EPS, 20, 0.03);
+  addRemovePt = false;
+	initialized = false;
+
+	this->zeroXYZ();
 
   if (useSimulatedData) {
 	  cap.open("glasses1.avi");
@@ -167,16 +172,14 @@ void Glasses::initXYZ() {
   {
     cout << "Could not initialize capturing for optical flow!\n";
   }
-  else {
-    // Automatic Initialization
+	else {
     cap >> frame;
     if (frame.empty()) return;
     frame.copyTo(image);
     cvtColor(image, gray, COLOR_BGR2GRAY);
     goodFeaturesToTrack(gray, points[1], MAX_COUNT, 0.01, 10, Mat(), 3, 0, 0.04);
     cornerSubPix(gray, points[1], subPixWinSize, Size(-1,-1), termcrit);
-    addRemovePt = false;
-  }
+	}
 }
 
 void Glasses::finishXYZ() {
@@ -214,6 +217,8 @@ void Glasses::zeroXYZ() {
   x = 0;
 	y = 0;
 	z = 0;
+	xi = 0;
+	yi = 0;
 }
 
 Glasses::~Glasses() {

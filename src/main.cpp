@@ -648,6 +648,7 @@ void keyboard(unsigned char key, int x, int y)
 				std::cout << "No" << std::endl;
 		} else {
 			reconstruction->reset();
+			glasses->zero();
 		}
 		break;
 	case (int)'u':
