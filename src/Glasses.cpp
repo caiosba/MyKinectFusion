@@ -75,12 +75,16 @@ void Glasses::initYawPitchRoll() {
 	}
 }
 
+void Glasses::readFrame() {
+  cap >> frame;
+}
+
 void Glasses::getXYZ() {
   // Automatic Initialization
   Size subPixWinSize(10,10);
 	Size winSize(31,31);
   TermCriteria termcrit(TermCriteria::COUNT|TermCriteria::EPS, 20, 0.03);
-  cap >> frame;
+  this->readFrame();
   if (frame.empty()) return;
   frame.copyTo(image);
   cvtColor(image, gray, COLOR_BGR2GRAY);
@@ -173,7 +177,7 @@ void Glasses::initXYZ() {
     cout << "Could not initialize capturing for optical flow!\n";
   }
 	else {
-    cap >> frame;
+    this->readFrame();
     if (frame.empty()) return;
     frame.copyTo(image);
     cvtColor(image, gray, COLOR_BGR2GRAY);

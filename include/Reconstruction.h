@@ -27,6 +27,14 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/openni_grabber.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <string.h>
+
 using namespace std;
 using namespace pcl;
 using namespace pcl::gpu;
@@ -115,10 +123,13 @@ public:
 	bool useYawPitchRollFromGlasses() { return enableYawPitchRollFromGlasses; }
 	bool useXYZFromGlasses() { return enableXYZFromGlasses; }
 	bool useGlasses() { return (enableYawPitchRollFromGlasses && enableXYZFromGlasses); }
+	bool getEnableGlasses() { return enableGlasses; }
 	bool useFile() { return enableCalibrationFile; }
 	bool getEnableGlassesBackground() { return enableGlassesBackground; }
 	void setGlassesFrame(cv::Mat frame) { glasses_frame_ = frame; }
 	cv::Mat getGlassesFrame() { return glasses_frame_; }
+	bool useSecondKinect() { return enableSecondKinect; }
+	void startSocketForSecondKinect(int port);
 	
 private:
 
@@ -186,6 +197,8 @@ private:
 	bool enableCalibrationFile;
 	bool enableGlassesBackground;
 	cv::Mat glasses_frame_;
+	bool enableSecondKinect;
+	int sock;
 };
 
 #endif

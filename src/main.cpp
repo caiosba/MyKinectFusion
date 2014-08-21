@@ -41,6 +41,7 @@ using namespace cv;
 int windowWidth = 1280;
 int windowHeight = 960;
 int socketPort = 6001;
+int socketPort2 = 6003;
 
 //Our Objects
 Kinect *kinect;
@@ -341,20 +342,25 @@ void displayRaycastedData()
 	glLoadIdentity();
   if (reconstruction->poseChanged()) {
 	  if (reconstruction->getEnableGlassesBackground()) {
-      Mat bg = reconstruction->getGlassesFrame();
-		  Mat image = Mat(480, 640, CV_8UC3, reconstruction->getRaycastImageFromPose());
-			if (bg.data && image.data) {
-        cvtColor(bg, bg, CV_BGR2RGB);
-		    for (int i=0; i < image.rows; i++) {
-		    	for (int j=0; j < image.cols; j++) {
-		    		if (image.at<cv::Vec3b>(i,j)[0] == 0 && image.at<cv::Vec3b>(i,j)[1] == 0 && image.at<cv::Vec3b>(i,j)[2] == 0) {
-		    	    image.at<cv::Vec3b>(i,j)[0] = bg.at<cv::Vec3b>(i,j)[0];
-		    	    image.at<cv::Vec3b>(i,j)[1] = bg.at<cv::Vec3b>(i,j)[1];
-		    	    image.at<cv::Vec3b>(i,j)[2] = bg.at<cv::Vec3b>(i,j)[2];
-		    		}
-          }
-		    }
-		    myGLImageViewer->loadRGBTexture((const unsigned char*)image.data, texVBO, RAYCAST_BO, windowWidth, windowHeight);
+      Mat bg = glasses->getFrame();
+			if (bg.empty()) {
+			  printf("No frame data\n");
+			}
+			else {
+		    Mat image = Mat(480, 640, CV_8UC3, reconstruction->getRaycastImageFromPose());
+			  if (bg.data && image.data) {
+          cvtColor(bg, bg, CV_BGR2RGB);
+		      for (int i=0; i < image.rows; i++) {
+		      	for (int j=0; j < image.cols; j++) {
+		      		if (image.at<cv::Vec3b>(i,j)[0] == 0 && image.at<cv::Vec3b>(i,j)[1] == 0 && image.at<cv::Vec3b>(i,j)[2] == 0) {
+		      	    image.at<cv::Vec3b>(i,j)[0] = bg.at<cv::Vec3b>(i,j)[0];
+		      	    image.at<cv::Vec3b>(i,j)[1] = bg.at<cv::Vec3b>(i,j)[1];
+		      	    image.at<cv::Vec3b>(i,j)[2] = bg.at<cv::Vec3b>(i,j)[2];
+		      		}
+            }
+		      }
+		      myGLImageViewer->loadRGBTexture((const unsigned char*)image.data, texVBO, RAYCAST_BO, windowWidth, windowHeight);
+			  }
 			}
 		}
 		else {
@@ -838,24 +844,35 @@ void* glasses_thread(void* param) {
 
 			// Get yaw, pitch, roll data from socket
 			// and x, y, z from optical flow
-			
-			glasses->get();
-			
-			yaw = glasses->getYaw();
-			pitch = glasses->getPitch();
-			roll = glasses->getRoll();
-			x = glasses->getX();
-			y = glasses->getY();
-			z = glasses->getZ();
-			frame = glasses->getFrame();
+		
+		  if (reconstruction->getEnableGlasses()) {
 
-			reconstruction->setGlassesYaw(yaw);
-			reconstruction->setGlassesPitch(pitch);
-			reconstruction->setGlassesRoll(roll);
-			reconstruction->setGlassesX(x);
-			reconstruction->setGlassesY(y);
-			reconstruction->setGlassesZ(z);
-			reconstruction->setGlassesFrame(frame);
+			  if (reconstruction->useYawPitchRollFromGlasses()) {
+				  glasses->getYawPitchRoll();
+			    yaw = glasses->getYaw();
+			    pitch = glasses->getPitch();
+			    roll = glasses->getRoll();
+			    reconstruction->setGlassesYaw(yaw);
+			    reconstruction->setGlassesPitch(pitch);
+			    reconstruction->setGlassesRoll(roll);
+				}
+
+        if (reconstruction->useXYZFromGlasses()) {
+				  glasses->getXYZ();
+			    x = glasses->getX();
+			    y = glasses->getY();
+			    z = glasses->getZ();
+			    reconstruction->setGlassesX(x);
+			    reconstruction->setGlassesY(y);
+			    reconstruction->setGlassesZ(z);
+				}
+				else {
+				  glasses->readFrame();
+				}
+
+			  frame = glasses->getFrame();
+			  reconstruction->setGlassesFrame(frame);
+			}
 		}
 		// Don't maximize CPU time
 		usleep(100000);
@@ -933,6 +950,7 @@ int main(int argc, char **argv) {
   {
 	//Initialize the Reconstruction object
 	reconstruction = new Reconstruction(volumeSize);
+	reconstruction->startSocketForSecondKinect(socketPort2);
 	kinect = new Kinect(live, onifile);
 	loadArguments(argc, argv, reconstruction);
   

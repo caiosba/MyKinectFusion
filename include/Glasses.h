@@ -48,6 +48,7 @@ public:
 	double getY() { return y - yi; }
 	double getZ() { return z; }
 	Mat getFrame() { return frame; }
+	void readFrame();
 
 private:
   int sock;
