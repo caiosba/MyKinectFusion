@@ -199,6 +199,8 @@ private:
 	cv::Mat glasses_frame_;
 	bool enableSecondKinect;
 	int sock;
+	bool secondKinectLive;
+	FILE *secondKinectInput;
 };
 
 #endif

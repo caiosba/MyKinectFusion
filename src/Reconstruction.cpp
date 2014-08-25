@@ -35,6 +35,7 @@ Reconstruction::Reconstruction(Eigen::Vector3i& volumeSize) {
 	enableGlassesBackground = true;
 	enableCalibrationFile = true;
 	enableSecondKinect = true;
+	secondKinectLive = false;
 
   float f = 525.f;
   image_->setDepthIntrinsics(f, f);
@@ -56,30 +57,35 @@ Reconstruction::Reconstruction(Eigen::Vector3i& volumeSize) {
 }
 
 void Reconstruction::startSocketForSecondKinect(int port) {
-  struct sockaddr_in name;
-  struct hostent *hp, *gethostbyname();
+  if (secondKinectLive) {
+    struct sockaddr_in name;
+    struct hostent *hp, *gethostbyname();
 
-  printf("Listen activating.\n");
+    printf("Listen activating.\n");
 
-  /* Create socket from which to read */
-  sock = socket(AF_INET, SOCK_DGRAM, 0);
-  if (sock < 0)   {
-    perror("Opening datagram socket\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  /* Bind our local address so that the client can send to us */
-  bzero((char *) &name, sizeof(name));
-  name.sin_family = AF_INET;
-  name.sin_addr.s_addr = htonl(INADDR_ANY);
-  name.sin_port = htons(port);
-  
-  if (bind(sock, (struct sockaddr *) &name, sizeof(name))) {
-    perror("Binding datagram socket\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  printf("Socket has port number #%d\n", ntohs(name.sin_port));
+    /* Create socket from which to read */
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0)   {
+      perror("Opening datagram socket\n");
+      exit(EXIT_FAILURE);
+    }
+    
+    /* Bind our local address so that the client can send to us */
+    bzero((char *) &name, sizeof(name));
+    name.sin_family = AF_INET;
+    name.sin_addr.s_addr = htonl(INADDR_ANY);
+    name.sin_port = htons(port);
+    
+    if (bind(sock, (struct sockaddr *) &name, sizeof(name))) {
+      perror("Binding datagram socket\n");
+      exit(EXIT_FAILURE);
+    }
+    
+    printf("Socket has port number #%d\n", ntohs(name.sin_port));
+	}
+	else {
+	  secondKinectInput = fopen("transformations.txt", "r");
+	}
 }
 
 void Reconstruction::transformCamera(std::vector<Matrix3frm>& Rcam, std::vector<Vector3f>& tcam, int globalTime) {
@@ -211,38 +217,46 @@ void Reconstruction::readPoseFromFile() {
 	  printf("X: %d Y: %d Z: %d\n", (int)opx, (int)opy, (int)opz);
 	}
 
-	else if (this->useSecondKinect()) {
-    char message[1024];
+	if (this->useSecondKinect()) {
     float r1, r2, r3, r4, r5, r6, r7, r8, r9, t1, t2, t3;
     int bytes;
 	  Vector3f t;
 	  Matrix3frm r;
 
-    bytes = read(sock, message, 1024);
-
-    if (bytes > 0) {
-      message[bytes] = '\0';
-      printf("Received message from socket\n");
-
-      sscanf(message, "%f %f %f %f %f %f %f %f %f|%f %f %f", &r1, &r2, &r3, &r4, &r5, &r6, &r7, &r8, &r9, &t1, &t2, &t3);
-	  	r << r1, r2, r3,
-	  	     r4, r5, r6,
-	  			 r7, r8, r9;
-	    t = { t1, t2, t3 };
-			cout << r << endl;
-			cout << "---" << endl;
-			cout << t << endl;
-			// Translation seems right but rotation is inverted
-			// translation = translation - t;
-			// rotation = rotation * r.inverse();
-			// Rotation seems right but translation is inverted
-			// translation = translation + t;
-			// rotation = r * rotation;
-			Vector3f aux;
-			aux = { t(0), -t(1), t(2) };
-			translation = translation + aux;
-			rotation = r * rotation;
+    // Read from file
+	  if (!secondKinectLive) {
+      printf("Received message from file\n");
+      fscanf(secondKinectInput, "%f %f %f %f %f %f %f %f %f|%f %f %f", &r1, &r2, &r3, &r4, &r5, &r6, &r7, &r8, &r9, &t1, &t2, &t3);
 	  }
+
+		// Listen from socket
+		else {
+      char message[1024];
+      bytes = read(sock, message, 1024);
+      if (bytes > 0) {
+        message[bytes] = '\0';
+        printf("Received message from socket\n");
+			}
+      sscanf(message, "%f %f %f %f %f %f %f %f %f|%f %f %f", &r1, &r2, &r3, &r4, &r5, &r6, &r7, &r8, &r9, &t1, &t2, &t3);
+    }
+
+	  r << r1, r2, r3,
+	       r4, r5, r6,
+	  		 r7, r8, r9;
+	  t = { t1, t2, t3 };
+		cout << r << endl;
+		cout << "---" << endl;
+		cout << t << endl;
+		// Translation seems right but rotation is inverted
+		// translation = translation - t;
+		// rotation = rotation * r.inverse();
+		// Rotation seems right but translation is inverted
+		// translation = translation + t;
+		// rotation = r * rotation;
+		Vector3f aux;
+		aux = { t(0), -t(1), t(2) };
+		translation = translation + aux;
+		rotation = r * rotation;
 	}
 
   // Debug
@@ -441,7 +455,7 @@ Reconstruction::~Reconstruction() {
 
   delete [] previousDepthData;
 
-	close(sock);
-
+	if (secondKinectLive) close(sock);
+	else fclose(secondKinectInput);
 }
 
