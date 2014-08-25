@@ -166,7 +166,7 @@ void Reconstruction::readPoseFromFile() {
 
 		//FIXME: t3 should not be necessary?
 		Vector3f t3;
-		t3 = { 40, 180, 530 };
+		t3 = { -80, 140, 550 };
 
 	  rotation = rcurr * r2.inverse();
 	  translation = r2.inverse() * tcurr + t2 + t3;

@@ -63,7 +63,7 @@ boost::shared_ptr<openni_wrapper::DepthImage> Kinect::removeBackground(const boo
 	cvCvtColor(rgbData, grayImage, CV_RGB2GRAY);
 	IplImage *bwImage = cvCreateImage(cvGetSize(grayImage),IPL_DEPTH_8U, 1);
 	// FIXME: Find a better threshold than 96
-	cvThreshold(grayImage, bwImage, 96, 255, CV_THRESH_BINARY);
+	cvThreshold(grayImage, bwImage, 64, 255, CV_THRESH_BINARY);
 	unsigned char *bwData = reinterpret_cast<unsigned char *>(bwImage->imageData);
 	// cvSaveImage("/tmp/image_bw.png", bwImage);
 	
