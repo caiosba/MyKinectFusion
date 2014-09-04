@@ -9,6 +9,7 @@
 #include <vector>
 #include <pcl/gpu/containers/device_array.h>
 #include <pcl/gpu/containers/kernel_containers.h>
+#include <pcl/common/time.h>
 #include "internal.h"
 //#include "../pcl-trunk/gpu/kinfu/tools/openni_capture.h"
 #include "../tools/openni_capture.h"

@@ -35,7 +35,7 @@ Reconstruction::Reconstruction(Eigen::Vector3i& volumeSize) {
 	enableGlassesBackground = true;
 	enableCalibrationFile = true;
 	enableSecondKinect = true;
-	secondKinectLive = false;
+	secondKinectLive = true;
 
   float f = 525.f;
   image_->setDepthIntrinsics(f, f);
@@ -272,72 +272,129 @@ void Reconstruction::readPoseFromFile() {
 }
 
 void Reconstruction::run(boost::shared_ptr<openni_wrapper::Image>& rgbImage, boost::shared_ptr<openni_wrapper::DepthImage>& depthImage) {
-  depthMap = image_->getDepthMap();
-  depthDevice = image_->getDepthDevice();
-  rgbDevice = image_->getRgbDevice();
-
-  depthMap.cols = depthImage->getWidth();
-  depthMap.rows = depthImage->getHeight();
-  depthMap.step = depthMap.cols * depthMap.elemSize();
-  
-  sourceDepthData.resize(depthMap.cols * depthMap.rows);
-  depthImage->fillDepthImageRaw(depthMap.cols, depthMap.rows, &sourceDepthData[0]);
-  depthMap.data = &sourceDepthData[0];
-
-  rgbMap.cols = rgbImage->getWidth();
-  rgbMap.rows = rgbImage->getHeight();
-  rgbMap.step = rgbMap.cols * rgbMap.elemSize();
-
-  sourceRgbData.resize(rgbMap.cols * rgbMap.rows);
-  rgbImage->fillRGB(rgbMap.cols, rgbMap.rows, (unsigned char*)&sourceRgbData[0]);
-	rgbMap.data = &sourceRgbData[0];
-  
-  rgbDevice.upload(rgbMap.data, rgbMap.step, rgbMap.rows, rgbMap.cols);
-  depthDevice.upload(depthMap.data, depthMap.step, depthMap.rows, depthMap.cols);
-  
-  ScopeTimeT time ("total-frame");
   {
-    image_->setDepthDevice(depthDevice);
-    image_->setRgbDevice(rgbDevice);
-    image_->applyBilateralFilter();
-    image_->applyDepthTruncation(threshold_);
-    image_->applyPyrDown();
-    image_->convertToPointCloud(currentPointCloud_);
-    image_->applyDepthTruncation(depthDevice, threshold_);
-    pcl::device::sync();
+    pcl::ScopeTime t("TOTAL FRAME");
+    depthMap = image_->getDepthMap();
+    depthDevice = image_->getDepthDevice();
+    rgbDevice = image_->getRgbDevice();
+
+    depthMap.cols = depthImage->getWidth();
+    depthMap.rows = depthImage->getHeight();
+    depthMap.step = depthMap.cols * depthMap.elemSize();
+    
+    sourceDepthData.resize(depthMap.cols * depthMap.rows);
+    depthImage->fillDepthImageRaw(depthMap.cols, depthMap.rows, &sourceDepthData[0]);
+    depthMap.data = &sourceDepthData[0];
+
+    rgbMap.cols = rgbImage->getWidth();
+    rgbMap.rows = rgbImage->getHeight();
+    rgbMap.step = rgbMap.cols * rgbMap.elemSize();
+
+    sourceRgbData.resize(rgbMap.cols * rgbMap.rows);
+    rgbImage->fillRGB(rgbMap.cols, rgbMap.rows, (unsigned char*)&sourceRgbData[0]);
+	  rgbMap.data = &sourceRgbData[0];
+    
+    rgbDevice.upload(rgbMap.data, rgbMap.step, rgbMap.rows, rgbMap.cols);
+    depthDevice.upload(depthMap.data, depthMap.step, depthMap.rows, depthMap.cols);
+    
+    printf("Iteration #%d\n", globalTime);
+    {
+      pcl::ScopeTime t1("    setDepthDevice");
+      image_->setDepthDevice(depthDevice);
+    }
+    {
+      pcl::ScopeTime t2("    setRgbDevice");
+      image_->setRgbDevice(rgbDevice);
+    }
+    {
+      pcl::ScopeTime t3("    applyBilateralFilter");
+      image_->applyBilateralFilter();
+    }
+    {
+      pcl::ScopeTime t4("    applyDepthTruncation");
+      image_->applyDepthTruncation(threshold_);
+    }
+    {
+      pcl::ScopeTime t5("    applyPyrDown");
+      image_->applyPyrDown();
+    }
+    {
+      pcl::ScopeTime t6("    convertToPointCloud");
+      image_->convertToPointCloud(currentPointCloud_);
+    }
+    {
+      pcl::ScopeTime t7("    applyDepthTruncation");
+      image_->applyDepthTruncation(depthDevice, threshold_);
+    }
+    {
+      pcl::ScopeTime t8("    sync");
+      pcl::device::sync();
+    }
 
     // First step
     if (globalTime == 0) {
-      tsdfVolume_->integrateVolume(rmats_, tvecs_, depthDevice, image_->getIntrinsics(), image_->getTrancationDistance(), image_->getDepthRawScaled(), globalTime);
-      currentPointCloud_->transformPointCloud(rmats_[0], tvecs_[0], globalPreviousPointCloud_->getVertexMaps(), globalPreviousPointCloud_->getNormalMaps());
+      {
+        pcl::ScopeTime t9("    first integrateVolume");
+        tsdfVolume_->integrateVolume(rmats_, tvecs_, depthDevice, image_->getIntrinsics(), image_->getTrancationDistance(), image_->getDepthRawScaled(), globalTime);
+      }
+      {
+        pcl::ScopeTime t10("    first transformPointCloud");
+        currentPointCloud_->transformPointCloud(rmats_[0], tvecs_[0], globalPreviousPointCloud_->getVertexMaps(), globalPreviousPointCloud_->getNormalMaps());
+      }
     }
 
     // From the second step, on
     else {
-      hasImage_ = currentPointCloud_->alignPointClouds(rmats_, tvecs_, globalPreviousPointCloud_, image_->getIntrinsics(), globalTime);
+      {
+        pcl::ScopeTime t11("    alignPointCloud");
+        hasImage_ = currentPointCloud_->alignPointClouds(rmats_, tvecs_, globalPreviousPointCloud_, image_->getIntrinsics(), globalTime);
+      }
 
-      if (!hasImage_) reset();
-      else {
-        tsdfVolume_->integrateVolume(rmats_, tvecs_, depthDevice, image_->getIntrinsics(), image_->getTrancationDistance(), image_->getDepthRawScaled(), globalTime);
+      {
+        pcl::ScopeTime t12("    reset");
+        if (!hasImage_) reset();
+      }
+
+      if (hasImage_) {
+        
+        {
+          pcl::ScopeTime t13("    integrateVolume");
+          tsdfVolume_->integrateVolume(rmats_, tvecs_, depthDevice, image_->getIntrinsics(), image_->getTrancationDistance(), image_->getDepthRawScaled(), globalTime);
+        }
+
         if (changePose_) {
-          this->readPoseFromFile();
-          tsdfVolume_->raycastFromPose(rmats_, tvecs_, image_->getIntrinsics(), image_->getTrancationDistance(), globalPreviousPointCloud_, globalTime, pose_rmats_, pose_tvecs_);
+          {
+            pcl::ScopeTime t15("    readPoseFromFile");
+            this->readPoseFromFile();
+          }
+          {
+            pcl::ScopeTime t16("    raycastFromPose");
+            tsdfVolume_->raycastFromPose(rmats_, tvecs_, image_->getIntrinsics(), image_->getTrancationDistance(), globalPreviousPointCloud_, globalTime, pose_rmats_, pose_tvecs_);
+          }
         }
         else {
-          tsdfVolume_->raycast(rmats_, tvecs_, image_->getIntrinsics(), image_->getTrancationDistance(), globalPreviousPointCloud_, globalTime);
+          {
+            pcl::ScopeTime t14("    raycast");
+            tsdfVolume_->raycast(rmats_, tvecs_, image_->getIntrinsics(), image_->getTrancationDistance(), globalPreviousPointCloud_, globalTime);
+          }
         }
-        pcl::device::sync ();
+        {
+          pcl::ScopeTime t17("    last sync");
+          pcl::device::sync();
+        }
       }
     }
-  } // END LOOP
-    
-  // Increment or not
-  if (hasIncrement_) {
-    globalTime++;
-    for (int pixel = 0; pixel < 640 * 480; pixel++)
-      previousDepthData[pixel] = depthMap.data[pixel];
-  } else hasIncrement_ = true;
 
+    {
+      pcl::ScopeTime t18("    last step");
+      // Increment or not
+      if (hasIncrement_) {
+        globalTime++;
+        for (int pixel = 0; pixel < 640 * 480; pixel++)
+          previousDepthData[pixel] = depthMap.data[pixel];
+      } else hasIncrement_ = true;
+    }
+  }
 }
 
 void Reconstruction::changePose()
