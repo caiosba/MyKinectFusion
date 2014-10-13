@@ -170,9 +170,9 @@ void Reconstruction::readPoseFromFile() {
 	  cv2eigen(t, t2);
 	  fs.release();
 
-		//FIXME: t3 should not be necessary?
+    // Compensate KinectFusion's virtual cube
 		Vector3f t3;
-		t3 = { -80, 140, 550 };
+		t3 = { 0, 0, 300 };
 
 	  rotation = rcurr * r2.inverse();
 	  translation = r2.inverse() * tcurr + t2 + t3;
@@ -218,45 +218,24 @@ void Reconstruction::readPoseFromFile() {
 	}
 
 	if (this->useSecondKinect()) {
-    float r1, r2, r3, r4, r5, r6, r7, r8, r9, t1, t2, t3;
-    int bytes;
-	  Vector3f t;
-	  Matrix3frm r;
+    Matrix3frm r;
+    r = this->getSecondKinectR();
+    Vector3f t;
+    t = this->getSecondKinectT();
 
-    // Read from file
-	  if (!secondKinectLive) {
-      printf("Received message from file\n");
-      fscanf(secondKinectInput, "%f %f %f %f %f %f %f %f %f|%f %f %f", &r1, &r2, &r3, &r4, &r5, &r6, &r7, &r8, &r9, &t1, &t2, &t3);
-	  }
+    // Translation seems right but rotation is inverted
+    // translation = translation - t;
+    // rotation = rotation * r.inverse();
+    // Rotation seems right but translation is inverted
+    // translation = translation + t;
+    // rotation = r * rotation;
+    Vector3f aux;
+    aux = { t(0), -t(1), t(2) };
+    // translation = translation + aux;
+    // rotation = r * rotation;
 
-		// Listen from socket
-		else {
-      char message[1024];
-      bytes = read(sock, message, 1024);
-      if (bytes > 0) {
-        message[bytes] = '\0';
-        printf("Received message from socket\n");
-			}
-      sscanf(message, "%f %f %f %f %f %f %f %f %f|%f %f %f", &r1, &r2, &r3, &r4, &r5, &r6, &r7, &r8, &r9, &t1, &t2, &t3);
-    }
-
-	  r << r1, r2, r3,
-	       r4, r5, r6,
-	  		 r7, r8, r9;
-	  t = { t1, t2, t3 };
-		cout << r << endl;
-		cout << "---" << endl;
-		cout << t << endl;
-		// Translation seems right but rotation is inverted
-		// translation = translation - t;
-		// rotation = rotation * r.inverse();
-		// Rotation seems right but translation is inverted
-		// translation = translation + t;
-		// rotation = r * rotation;
-		Vector3f aux;
-		aux = { t(0), -t(1), t(2) };
-		translation = translation + aux;
-		rotation = r * rotation;
+    rotation = r * rotation;
+    translation = translation + aux;
 	}
 
   // Debug

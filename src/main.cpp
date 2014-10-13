@@ -835,6 +835,48 @@ void* pcl_viewer_thread(void* param) {
   }
 }
 
+void* second_kinect_thread(void* param) {
+  if (reconstruction->useSecondKinect()) {
+	  while (true) {
+      if (reconstruction->poseChanged()) {
+        float r1, r2, r3, r4, r5, r6, r7, r8, r9, t1, t2, t3;
+        int bytes;
+	      Vector3f t;
+	      Matrix3frm r;
+
+        // Read from file
+	      if (!reconstruction->getSecondKinectLive()) {
+          printf("Received message from file\n");
+          fscanf(reconstruction->getSecondKinectInput(), "%f %f %f %f %f %f %f %f %f|%f %f %f", &r1, &r2, &r3, &r4, &r5, &r6, &r7, &r8, &r9, &t1, &t2, &t3);
+	      }
+
+		    // Listen from socket
+		    else {
+          char message[1024];
+          bytes = read(reconstruction->getSock(), message, 1024);
+          if (bytes > 0) {
+            message[bytes] = '\0';
+            printf("Received message from socket\n");
+		    	}
+          sscanf(message, "%f %f %f %f %f %f %f %f %f|%f %f %f", &r1, &r2, &r3, &r4, &r5, &r6, &r7, &r8, &r9, &t1, &t2, &t3);
+        }
+
+	      r << r1, r2, r3,
+	           r4, r5, r6,
+	      		 r7, r8, r9;
+	      t = { t1, t2, t3 };
+		    cout << r << endl;
+		    cout << "---" << endl;
+		    cout << t << endl;
+
+		    reconstruction->setSecondKinectR(r);
+		    reconstruction->setSecondKinectT(t);
+      }
+		  usleep(50000);
+    }
+  }
+}
+
 void* glasses_thread(void* param) {
   long yaw, pitch, roll;
 	double x, y, z;
@@ -942,7 +984,7 @@ int main(int argc, char **argv) {
 	}
   
   //This argument is an exception. It is loaded first because it is necessary to instantiate the Reconstruction object
-  Eigen::Vector3i volumeSize(3000, 3000, 3000); //mm
+  Eigen::Vector3i volumeSize(700, 700, 1400); //mm
   if (pcl::console::parse_3x_arguments(argc, argv, "--volumesize", volumeSize(0), volumeSize(1), volumeSize(2)) >= 0) {
   }
   
@@ -970,6 +1012,10 @@ int main(int argc, char **argv) {
   glasses->init();
 	pthread_t thread_glasses;
   pthread_create(&thread_glasses, NULL, glasses_thread, (void *)&glasses);
+
+	// Second Kinect integration
+	pthread_t thread_second_kinect;
+  pthread_create(&thread_second_kinect, NULL, second_kinect_thread, (void *)&reconstruction);
 
 	//Initialize the GL window
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_ALPHA);

@@ -32,7 +32,7 @@ MyPointCloud::MyPointCloud(int cols, int rows) {
 	cols_ = cols;
 
 	//10, 5, 4
-	const int iters[] = {10, 5, 4};
+	const int iters[] = {1, 1, 1};
 	std::copy (iters, iters + LEVELS, icpIterations_);
 
 	distThres_ = 100;

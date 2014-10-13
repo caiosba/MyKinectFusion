@@ -4,7 +4,7 @@ Kinect::Kinect(bool live, char *onifile)
 {
   try {
 		if (live) {
-	    capture = new pcl::OpenNIGrabber("#2");
+	    capture = new pcl::OpenNIGrabber("#1");
 		}
 	  
     else {

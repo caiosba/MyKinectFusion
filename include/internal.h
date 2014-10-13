@@ -55,7 +55,7 @@ namespace pcl
     //Tsdf fixed point divisor (if old format is enabled)
     const int DIVISOR = 32767;     // SHRT_MAX;
 
-    enum { VOLUME_X = 512, VOLUME_Y = 512, VOLUME_Z = 512};
+    enum { VOLUME_X = 256, VOLUME_Y = 256, VOLUME_Z = 256};
 
     /** \brief Camera intrinsics structure
       */ 

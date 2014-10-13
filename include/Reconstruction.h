@@ -130,6 +130,13 @@ public:
 	cv::Mat getGlassesFrame() { return glasses_frame_; }
 	bool useSecondKinect() { return enableSecondKinect; }
 	void startSocketForSecondKinect(int port);
+  void setSecondKinectR(Matrix3frm r) { secondKinectR = r; }
+  void setSecondKinectT(Vector3f t) { secondKinectT = t; }
+  Matrix3frm getSecondKinectR() { return secondKinectR; }
+  Vector3f getSecondKinectT() { return secondKinectT; }
+  bool getSecondKinectLive() { return secondKinectLive; }
+  FILE * getSecondKinectInput() { return secondKinectInput; }
+  int getSock() { return sock; }
 	
 private:
 
@@ -201,6 +208,8 @@ private:
 	int sock;
 	bool secondKinectLive;
 	FILE *secondKinectInput;
+  Matrix3frm secondKinectR;
+  Vector3f secondKinectT;
 };
 
 #endif
