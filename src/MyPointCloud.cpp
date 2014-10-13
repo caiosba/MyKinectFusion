@@ -79,10 +79,12 @@ bool MyPointCloud::alignPointClouds(std::vector<Matrix3frm>& Rcam, std::vector<V
 	Matrix3frm Rcurr = Rprev; // tranform to global coo for ith camera pose
 	Vector3f tcurr = tprev;
 	
+  #pragma omp parallel for
 	for(int level = LEVELS - 1; level >= 0; --level) {
 	
 		int iterations = icpIterations_[level];
 
+    #pragma omp parallel for
 		for(int iteration = 0; iteration < iterations; ++iteration) {
       {
         printf("        ICP level %d iteration %d", level, iteration);

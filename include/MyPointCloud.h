@@ -13,6 +13,7 @@
 #include "internal.h"
 //#include "../pcl-trunk/gpu/kinfu/tools/openni_capture.h"
 #include "../tools/openni_capture.h"
+#include <omp.h>
 
 #define LEVELS 3
 
