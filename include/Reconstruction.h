@@ -35,6 +35,8 @@
 #include <fcntl.h>
 #include <string.h>
 
+#include <Eigen/Geometry>
+
 using namespace std;
 using namespace pcl;
 using namespace pcl::gpu;
@@ -210,6 +212,8 @@ private:
 	FILE *secondKinectInput;
   Matrix3frm secondKinectR;
   Vector3f secondKinectT;
+  Vector3f secondKinectTini;
+  bool secondKinectHasTini;
 };
 
 #endif

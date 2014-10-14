@@ -54,6 +54,8 @@ Reconstruction::Reconstruction(Eigen::Vector3i& volumeSize) {
 
   previousDepthData = new unsigned short[640 * 480];
 
+  secondKinectHasTini = false;
+
 }
 
 void Reconstruction::startSocketForSecondKinect(int port) {
@@ -222,6 +224,11 @@ void Reconstruction::readPoseFromFile() {
     r = this->getSecondKinectR();
     Vector3f t;
     t = this->getSecondKinectT();
+    if (!secondKinectHasTini) {
+      secondKinectTini = t;
+      secondKinectHasTini = true;
+    }
+    t = t - secondKinectTini;
 
     // Translation seems right but rotation is inverted
     // translation = translation - t;
@@ -229,11 +236,24 @@ void Reconstruction::readPoseFromFile() {
     // Rotation seems right but translation is inverted
     // translation = translation + t;
     // rotation = r * rotation;
-    Vector3f aux;
-    aux = { t(0), -t(1), t(2) };
     // translation = translation + aux;
     // rotation = r * rotation;
 
+    // Vector3f euler;
+    // euler = r.eulerAngles(0, 1, 2);
+    // double pitch = -euler[0];
+    // double yaw = -euler[1];
+    // double roll = -euler[2];
+    // Eigen::Quaternion<double> q = Eigen::AngleAxisd(roll, Eigen::Vector3d::UnitZ()) *
+    //                               Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitY())  *
+    //                               Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitX());
+    // Matrix3d qm;
+    // Matrix3frm rm;
+	  // qm = q.matrix();
+	  // rm = qm.cast<float>();
+
+    Vector3f aux;
+    aux = { t(0) - 20, -t(1), t(2) };
     rotation = r * rotation;
     translation = translation + aux;
 	}
